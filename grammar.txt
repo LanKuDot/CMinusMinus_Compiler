@@ -4,30 +4,40 @@ VarDeclList
     VarDecl VarDeclList
     epsilon
 VarDecl
-    Type id ;
-    Type id [ num ] ;
+    Type id VarDecl'
+VarDecl'
+	;
+	[num] ;
 FunDeclList
-    FunDecl
-    FunDecl FundeclList
+    FunDecl FunDeclList'
+FunDeclList'
+	epsilon
+	FundeclList
 FunDecl
     Type id ( ParamDeclList ) Block
 ParamDeclList
     ParamDeclListTail
     epsilon
 ParamDeclListTail
-    ParamDecl
-    ParamDecl , ParamDeclListTail
+    ParamDecl ParamDeclListTail'
+ParamDeclListTail'
+	epsilon	
+	, ParamDeclListTail
 ParamDecl
-    Type id
-    Type id [ ]
+    Type id ParamDecl'
+ParamDecl'
+	epsilon
+	[ ]
 Block
     { VarDeclList StmtList }
 Type
     int
     char
 StmtList
-    Stmt
-    Stmt StmtList
+    Stmt StmtList'
+StmtList'
+	epsilon
+	StmtList
 Stmt
     ;
     Expr ;
@@ -40,20 +50,26 @@ Expr
     Primary
     UnaryOp Expr
     Expr BinOp Expr
-    id = Expr
-    id [ Expr ] = Expr
+    id Expr'
+Expr'
+	= Expr
+	[ Expr ] = Expr
 Primary
-    id
+    id Primary'
     num
     ( Expr )
-    id ( ExprList )
-    id [ Expr ]
+Primary'
+	epsilon
+	( ExprList )
+	[ Expr ]
 ExprList
     ExprListTail
     epsilon
 ExprListTail
-    Expr
-    Expr , ExprListTail
+    Expr ExprListTail'
+ExprListTail'
+	epsilon
+	, ExprListTail
 UnaryOp
     -
     !
