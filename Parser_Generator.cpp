@@ -8,6 +8,7 @@
 using namespace std;
 
 typedef string LHS;
+// RHS is a 2-d vector storing grammar
 typedef vector< vector<string> > RHS;
 
 void readFile(map<LHS, RHS>);
@@ -19,57 +20,65 @@ void readFile(map<LHS, RHS> grammar) {
 	ifstream fin ("grammar.txt");
 	string line;
 	int index = 0;	
+	LHS lhs;
+	RHS rhs;
 
 	if (fin.is_open()) {
-		while (getline(fin, line)) {
-			LHS lhs;
-			RHS rhs;
+		while (1) {
+			//cout << "Parsing : " << line << endl;
+			if(!getline(fin, line)) break;
 			if(line.at(0) != ' ') {
-				cout << "lhs : " << line << endl;
+				if(rhs.size() != 0) {
+					grammar.insert(pair<LHS, RHS>(lhs, rhs));
+				}
+				index = 0;
+				// clear lhs and rhs for next grammar
+				lhs = ""; rhs.clear();
+				//cout << "lhs : " << line << endl;
 				lhs = line;
 			} else {
-				cout << "rhs : " << endl;
-				if(getline(fin, line) && line.at(0) == ' '){
-					cout << "rule" << index << " : "<< line << endl;	
-					istringstream iss(line);
-					vector<string> tmp;
-					do {
-						string token;
-						iss >> token;
-						cout << "SubString : " << token << endl;
-						tmp.insert(token);
-					} while (iss)
-					rhs.push_back(vector<string>());
-					index++;
-				}
+				//cout << "rhs : " << endl;
+				//cout << "rule" << index << " : "<< line << endl;	
+				istringstream iss(line);
+				vector<string> tmp;
+				// split line into tokens with whitespaces chars
+				while (iss) {
+					string token;
+					iss >> token;
+					if (token != "") {
+						//cout << "SubString : " << token << endl;
+						tmp.push_back(token); 
+					}
+				};
+				rhs.push_back(tmp);
+				index++;
 			}
-			grammar.insert(pair<LHS, RHS>(lhs, rhs));
 		}
+		grammar.insert(pair<LHS, RHS>(lhs, rhs));
 		fin.close();	
 	} else {
 		cout << "Unable to open file." << endl;
 	}
 
-
+/*	
 	for (map<LHS, RHS>::iterator it = grammar.begin(); it != grammar.end(); it++) {
-		LHS lhs = it.first;
-		RHS rhs = it.second;
-		cout << lhs << endl;
-		for (RHS::iterator j = rhs.begin(); j != rhs.end(); j++) {
-			for (vector<string>::iterator k = rhs[j].begin(); k != rhs.begin(j); k++) {
-				cout << rhs[j][k];
+		LHS lhs = it -> first;
+		RHS rhs = it -> second;
+		cout << "LHS : " + lhs << endl;
+		for (int j = 0; j != rhs.size(); j++) {
+			for (int k = 0; k != rhs[j].size(); k++) {
+				cout << rhs[j][k] << " ";
 			}
 			cout << endl;
 		}
 	}
-
+*/
 	return;	
 }
 
 int main() {
 	map<LHS, RHS> grammar;
 	readFile(grammar);
-	// read in grammar.txt
 	
 	return 0;	
 }

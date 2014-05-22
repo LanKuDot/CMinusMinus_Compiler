@@ -1,0 +1,88 @@
+LHS : BinOp
++ 
+- 
+* 
+/ 
+== 
+!= 
+< 
+<= 
+> 
+>= 
+&& 
+|| 
+LHS : Block
+{ VarDeclList StmtList } 
+LHS : Expr
+Primary 
+UnaryOp Expr 
+Expr BinOp Expr 
+id Expr' 
+LHS : Expr'
+= Expr 
+[ Expr ] = Expr 
+LHS : ExprList
+ExprListTail 
+epsilon 
+LHS : ExprListTail
+Expr ExprListTail' 
+LHS : ExprListTail'
+epsilon 
+, ExprListTail 
+LHS : FunDecl
+Type id ( ParamDeclList ) Block 
+LHS : FunDeclList
+FunDecl FunDeclList' 
+LHS : FunDeclList'
+epsilon 
+FundeclList 
+LHS : ParamDecl
+Type id ParamDecl' 
+LHS : ParamDecl'
+epsilon 
+[ ] 
+LHS : ParamDeclList
+ParamDeclListTail 
+epsilon 
+LHS : ParamDeclListTail
+ParamDecl ParamDeclListTail' 
+LHS : ParamDeclListTail'
+epsilon 
+, ParamDeclListTail 
+LHS : Primary
+id Primary' 
+num 
+( Expr ) 
+LHS : Primary'
+epsilon 
+( ExprList ) 
+[ Expr ] 
+LHS : Program
+VarDeclList FunDeclList 
+LHS : Stmt
+; 
+Expr ; 
+return Expr ; 
+break ; 
+if ( Expr ) Stmt else Stmt 
+while ( Expr ) Stmt 
+Block 
+LHS : StmtList
+Stmt StmtList' 
+LHS : StmtList'
+epsilon 
+StmtList 
+LHS : Type
+int 
+char 
+LHS : UnaryOp
+- 
+! 
+LHS : VarDecl
+Type id VarDecl' 
+LHS : VarDecl'
+; 
+[num] ; 
+LHS : VarDeclList
+VarDecl VarDeclList 
+epsilon 
