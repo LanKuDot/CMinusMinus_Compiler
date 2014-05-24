@@ -47,13 +47,14 @@ Stmt
     while ( Expr ) Stmt
     Block
 Expr
-    Primary
-    UnaryOp Expr
-    Expr BinOp Expr
-    id Expr'
+    Primary Expr''
+    UnaryOp Expr Expr''
+    id Expr' Expr''
 Expr'
     = Expr
     [ Expr ] = Expr
+Expr''
+    BinOp Expr Expr''
 Primary
     id Primary'
     num
