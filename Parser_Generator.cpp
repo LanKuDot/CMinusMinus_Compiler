@@ -95,8 +95,9 @@ void readFile(const char * fileName, GRAMMAR & grammar) {
 	return;
 }
 
-bool isUppercase(string s) {
-	if(s.at(0) >= 65 && s.at(0) <= 90) {
+bool isNonterminal(string s) {
+	/* All nonterminal would start with a upper-case character. */
+	if( isupper( s.at(0)) ) {
 		return true;
 	} else {
 		return false;
@@ -110,8 +111,8 @@ bool nullable(GRAMMAR grammar, LHS lhs) {
 	for (int i = 0; i != rhs.size(); i++) {
 		// check all elements in the rule
 		for (int j = 0; j != rhs[i].size(); j++) {
-			// check if the element is uppercase(nonterminal)
-			if(isUppercase(rhs[i][j])) {
+			// check if the element is nonterminal
+			if(isNonterminal(rhs[i][j])) {
 				if(nullable(grammar, rhs[i][j])) {
 					// do nothing
 				} else {
