@@ -13,15 +13,17 @@ typedef string LHS;
 typedef vector< vector<string> > RHS;
 typedef map<LHS, RHS> GRAMMAR;
 
-void readFile(const char *, GRAMMAR &);
-bool isUppercase(string);
-bool nullable();
-void getFirst(GRAMMAR, LHS, vector<string> &);
-void getTerminal(GRAMMAR, LHS, vector<string> &);
+void readFile(const char *);
+bool isNonterminal(LHS);
+bool nullable(LHS);
+set<string> getFirst(LHS);
+void getTerminal(LHS, vector<string> &);
 void follow();
 
+GRAMMAR grammar;
+map<LHS, set<string> > firstTable;
 
-void readFile(const char * fileName, GRAMMAR & grammar) {
+void readFile(const char * fileName) {
 	ifstream fin (fileName);
 	string line;
 	int index = 0;	
