@@ -15,7 +15,8 @@ typedef map<LHS, RHS> GRAMMAR;
 void readFile(const char *, GRAMMAR &);
 bool isUppercase(string);
 bool nullable();
-void first();
+void getFirst(GRAMMAR, LHS, vector<string> &);
+void getTerminal(GRAMMAR, LHS, vector<string> &);
 void follow();
 
 
