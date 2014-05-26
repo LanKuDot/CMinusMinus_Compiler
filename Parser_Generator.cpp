@@ -133,106 +133,85 @@ bool nullable(LHS lhs) {
 			}
 		}
 	}
-	// now we have checked all the rules, but none of them are nullable,
-	// then return false.
+	/* now we have checked all the rules, but none of them are nullable,
+	 * then return false.
+	 */
 	return false;
 }
 
-void getFirst(GRAMMAR grammar, LHS lhs, vector<string> & listOfFirst) {
-	cout << "Start getFirst of " + lhs << endl;
+set<string> getFirst(LHS lhs) {
 	RHS rhs = grammar.find(lhs)	-> second;
-	//listOfFirst.clear();
+	set<string> list;
 
-	for (int i = 0; i != rhs.size(); i++) {
-		for (int j = 0; j != rhs[i].size(); j++) {
-			// if the token is nonterminal
-			cout << "add " + rhs[i][j] << endl;
-			if (isNonterminal(rhs[i][j])) {
-				if (nullable(grammar, rhs[i][j])) {
-					listOfFirst.push_back(rhs[i][j]);
-				} 
-				else {
-					listOfFirst.push_back(rhs[i][j]);
-					break;	
-				}
-			}
-			// if the token is terminal
-			else {
-				if (nullable(grammar, rhs[i][j])) {
-					listOfFirst.push_back(rhs[i][j]);
-					// do nothing, move to next token
-				} else {
-					listOfFirst.push_back(rhs[i][j]);
+	/* check the table to find if we have done the LHS before 
+	 * if we have, then return the set in the table instead of
+	 * going ahead.
+	 */
+	if (firstTable[lhs].size() != 0) 
+		return firstTable[lhs];
+
+	/* if lhs is epsilon , then return null set */
+	if (lhs == "epsilon") 
+		return list;
+
+	/*
+	 * check if lhs is terminal, if yes, then insert lhs into
+	 * list, else recursivly search all rules and insert the 
+	 * terminals.
+	 */
+	if (!isNonterminal(lhs)) {
+		list.insert(lhs);
+		return list;
+	} else {
+		for (int i = 0; i != rhs.size(); i++) {
+			for (int j = 0; j != rhs[i].size(); j++) {
+				set<string> tmp = getFirst(rhs[i][j]);
+				list.insert(tmp.begin(), tmp.end());
+				if (!nullable(rhs[i][j]))
 					break;
-				}
 			}
 		}
-	}
-	
-	cout << "add all first(including nonterminal)";
-
-	for (int i = 0; i != listOfFirst.size(); i++) {
-		if (isNonterminal(listOfFirst[i])) {
-			getTerminal(grammar, lhs, listOfFirst);	
-			listOfFirst.erase(listOfFirst.begin() + i);
-		}
-	}
-	
-	// debugging
-	cout << "LHS: " + lhs << endl;
-	for(int i = 0; i != listOfFirst.size(); i++) {
-		cout << listOfFirst[i] + " " << endl;	
+		return list;
 	}
 
-	return ;
 }
-
-void getTerminal(GRAMMAR grammar, LHS lhs, vector<string> & listOfFirst) {
-	cout << "Start getTerminal of " + lhs << endl;
-
-	RHS rhs = grammar.find(lhs) -> second;
-
-	for (int i = 0; i != rhs.size(); i++) {
-		for (int j = 0; j != rhs[i].size(); j++) {
-			if (isNonterminal(rhs[i][j])) {
-				getTerminal(grammar, rhs[i][j], listOfFirst);	
-			}
-			else {
-				cout << "add " + rhs[i][j] << endl;
-				listOfFirst.push_back(rhs[i][j]);
-			}
-		}
-	}
-	return ;
-}
-
 
 int main() {
-	GRAMMAR grammar;
+
 	GRAMMAR::iterator it;
 	const char * fileName = "grammar.txt";
 
-	readFile(fileName, grammar);
+	readFile(fileName);
+
 	/*
 	for (it = grammar.begin(); it != grammar.end(); it++) {
 		LHS lhs = it -> first;
 		//if(lhs == "VarDeclList")
-			if(nullable(grammar, lhs)) {
+			if(nullable(lhs)) {
 				cout << lhs << " is nullable." << endl;
 			}
 	} */
 
-	map<LHS, vector<string> > mapOfFirst;
-
 	for (it = grammar.begin(); it != grammar.end(); it++) {
-		LHS lhs;
-		vector<string> listOfFirst;
+		LHS lhs = it -> first;
+		firstTable[lhs] = getFirst(lhs);
+	}
 
-		lhs = it -> first;
-		getFirst(grammar, lhs, listOfFirst);
-		mapOfFirst.insert(pair<LHS, vector<string> >(lhs, listOfFirst));
 
-		break;
+	/* show all elements in the firstTable */
+	map<LHS, set<string> >:: iterator itFirst;
+	set<string>:: iterator itSet;
+
+	for (itFirst = firstTable.begin(); itFirst != firstTable.end(); itFirst++) {
+		LHS lhs = itFirst -> first;
+		if (isNonterminal(lhs)) {
+			cout << lhs + ": ";
+		
+			for (itSet = firstTable[lhs].begin(); itSet != firstTable[lhs].end(); itSet++) {
+				cout << *itSet + " ";	
+			}
+			cout << endl;
+		}
 	}
 
 
