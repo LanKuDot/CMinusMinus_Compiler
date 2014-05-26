@@ -184,6 +184,25 @@ void getFirst(GRAMMAR grammar, LHS lhs, vector<string> & listOfFirst) {
 	return ;
 }
 
+void getTerminal(GRAMMAR grammar, LHS lhs, vector<string> & listOfFirst) {
+	cout << "Start getTerminal of " + lhs << endl;
+
+	RHS rhs = grammar.find(lhs) -> second;
+
+	for (int i = 0; i != rhs.size(); i++) {
+		for (int j = 0; j != rhs[i].size(); j++) {
+			if (isNonterminal(rhs[i][j])) {
+				getTerminal(grammar, rhs[i][j], listOfFirst);	
+			}
+			else {
+				cout << "add " + rhs[i][j] << endl;
+				listOfFirst.push_back(rhs[i][j]);
+			}
+		}
+	}
+	return ;
+}
+
 
 int main() {
 	GRAMMAR grammar;
