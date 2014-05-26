@@ -210,14 +210,28 @@ int main() {
 	const char * fileName = "grammar.txt";
 
 	readFile(fileName, grammar);
-	
+	/*
 	for (it = grammar.begin(); it != grammar.end(); it++) {
 		LHS lhs = it -> first;
 		//if(lhs == "VarDeclList")
 			if(nullable(grammar, lhs)) {
 				cout << lhs << " is nullable." << endl;
 			}
+	} */
+
+	map<LHS, vector<string> > mapOfFirst;
+
+	for (it = grammar.begin(); it != grammar.end(); it++) {
+		LHS lhs;
+		vector<string> listOfFirst;
+
+		lhs = it -> first;
+		getFirst(grammar, lhs, listOfFirst);
+		mapOfFirst.insert(pair<LHS, vector<string> >(lhs, listOfFirst));
+
+		break;
 	}
+
 
 	return 0;	
 }
