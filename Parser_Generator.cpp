@@ -108,16 +108,15 @@ bool isNonterminal(string s) {
 	}
 }
 
-bool nullable(GRAMMAR grammar, LHS lhs) {
+bool nullable(LHS lhs) {
 	RHS rhs = grammar.find(lhs) -> second;
-	//cout << "Check nullable " + lhs << endl;
 	// check all rules
 	for (int i = 0; i != rhs.size(); i++) {
 		// check all elements in the rule
 		for (int j = 0; j != rhs[i].size(); j++) {
 			// check if the element is nonterminal
 			if(isNonterminal(rhs[i][j])) {
-				if(nullable(grammar, rhs[i][j])) {
+				if(nullable(rhs[i][j])) {
 					// do nothing
 				} else {
 					// don't need to check the next element, go to 
