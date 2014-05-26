@@ -135,6 +135,55 @@ bool nullable(GRAMMAR grammar, LHS lhs) {
 	return false;
 }
 
+void getFirst(GRAMMAR grammar, LHS lhs, vector<string> & listOfFirst) {
+	cout << "Start getFirst of " + lhs << endl;
+	RHS rhs = grammar.find(lhs)	-> second;
+	//listOfFirst.clear();
+
+	for (int i = 0; i != rhs.size(); i++) {
+		for (int j = 0; j != rhs[i].size(); j++) {
+			// if the token is nonterminal
+			cout << "add " + rhs[i][j] << endl;
+			if (isNonterminal(rhs[i][j])) {
+				if (nullable(grammar, rhs[i][j])) {
+					listOfFirst.push_back(rhs[i][j]);
+				} 
+				else {
+					listOfFirst.push_back(rhs[i][j]);
+					break;	
+				}
+			}
+			// if the token is terminal
+			else {
+				if (nullable(grammar, rhs[i][j])) {
+					listOfFirst.push_back(rhs[i][j]);
+					// do nothing, move to next token
+				} else {
+					listOfFirst.push_back(rhs[i][j]);
+					break;
+				}
+			}
+		}
+	}
+	
+	cout << "add all first(including nonterminal)";
+
+	for (int i = 0; i != listOfFirst.size(); i++) {
+		if (isNonterminal(listOfFirst[i])) {
+			getTerminal(grammar, lhs, listOfFirst);	
+			listOfFirst.erase(listOfFirst.begin() + i);
+		}
+	}
+	
+	// debugging
+	cout << "LHS: " + lhs << endl;
+	for(int i = 0; i != listOfFirst.size(); i++) {
+		cout << listOfFirst[i] + " " << endl;	
+	}
+
+	return ;
+}
+
 
 int main() {
 	GRAMMAR grammar;
