@@ -146,6 +146,10 @@ set<string> getFirst(LHS lhs) {
 	RHS rhs = grammar.find(lhs)	-> second;
 	set<string> list;
 
+	if (!isNonterminal(lhs) && firstTable[lhs].size() == 0) {
+		firstTable[lhs].insert(lhs);
+	}
+
 	/* check the table to find if we have done the LHS before 
 	 * if we have, then return the set in the table instead of
 	 * going ahead.
