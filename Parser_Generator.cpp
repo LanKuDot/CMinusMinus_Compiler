@@ -109,6 +109,9 @@ bool isNonterminal(string s) {
 }
 
 bool nullable(LHS lhs) {
+
+	if(!isNonterminal(lhs)) return false;
+
 	RHS rhs = grammar.find(lhs) -> second;
 	// check all rules
 	for (int i = 0; i != rhs.size(); i++) {
