@@ -17,7 +17,8 @@ void readFile(const char *);
 bool isNonterminal(LHS);
 bool nullable(LHS);
 set<string> getFirst(LHS);
-void gerFollow();
+void getFollow();
+void eliminateNonterminal();
 
 GRAMMAR grammar;
 map<LHS, set<string> > firstTable;
@@ -184,7 +185,6 @@ set<string> getFirst(LHS lhs) {
 }
 
 
-
 void getFollow(LHS lhs) {
 	cout << "[START] getFollow : Follow(" + lhs + "): "<< endl;
 
@@ -213,26 +213,42 @@ void getFollow(LHS lhs) {
 				// Rule 1
 				tmp = firstTable[nextToken];
 				followTable[token].insert(tmp.begin(), tmp.end());
-				cout << "add First(" + token + ")" << endl;
+				cout << token + " add First(" + nextToken + ")" << endl;
 
 				// Rule 2
-				if(nullable(nextToken)) {
-					followTable[token].insert(nextToken);	
-					cout << "add Follow(" + nextToken + ")" << endl;
+				if(isNonterminal(token)) {
+					if(nullable(nextToken)) {
+						followTable[token].insert(nextToken);	
+						cout << token + " add Follow(" + nextToken + ")" << endl;
 
 				// Rule 3
-					followTable[token].insert(lhs);
-					cout << "add Follow(" + lhs + ")" << endl;
-				}
-
+						followTable[token].insert(lhs);
+						cout << token + " add Follow(" + lhs + ")" << endl;
+					}
 				// Rule 4
-				followTable[token].insert(lhs);
-				cout << "add Follow(" + lhs + ")" << endl;
+					followTable[token].insert(lhs);
+					cout << token + " add Follow(" + lhs + ")" << endl;
+			
+				}
+			} else {
+				if (isNonterminal(token)) {
+					followTable[token].insert(lhs);
+					cout << "123" + token + " add Follow(" + lhs + ")" << endl;
+				}
 			}
 		}
 	}
+	
+		cout << "====================================================" << endl;
+}
 
-	cout << "====================================================" << endl;
+void eliminateNonterminal (LHS lhs) {
+	/*
+	 * TODO : scanning the followTable[lhs] and if there is nonterminal
+	 * find followTable[nonterminal] and replace the nonterminal in followTable[lhs]
+	 * with followTable[nonterminal]
+	 */
+	return ;
 }
 
 int main() {
