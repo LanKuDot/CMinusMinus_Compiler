@@ -17,11 +17,11 @@ void readFile(const char *);
 bool isNonterminal(LHS);
 bool nullable(LHS);
 set<string> getFirst(LHS);
-void getTerminal(LHS, vector<string> &);
-void follow();
+void gerFollow();
 
 GRAMMAR grammar;
 map<LHS, set<string> > firstTable;
+map<LHS, set<string> > followTable;
 
 void readFile(const char * fileName) {
 	ifstream fin (fileName);
