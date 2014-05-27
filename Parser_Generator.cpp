@@ -183,6 +183,58 @@ set<string> getFirst(LHS lhs) {
 
 }
 
+
+
+void getFollow(LHS lhs) {
+	cout << "[START] getFollow : Follow(" + lhs + "): "<< endl;
+
+	RHS rhs = grammar.find(lhs) -> second;
+	set<string> tmp;
+
+	// A -> BC
+	// Rules : 
+	// 1. Follow(B) contains First(C)
+	// 2. Follow(B) contains Follow(C) if nullable(C) is true
+	// 3. Follow(B) contains Follow(A) if nullable(C) is true
+	// 4. Follow(C) contains Follow(A) 
+	// 
+
+	// if lhs is start symbol, add $ 
+	if (lhs == "Program") { followTable[lhs].insert("$"); }
+
+	for (int i = 0; i != rhs.size(); i++) {
+		for (int j = 0; j != rhs[i].size(); j++) {
+			string nextToken;
+			string token = rhs[i][j];  
+			// check if next token exist
+			if((j + 1) < rhs[i].size()) {
+				nextToken = rhs[i][j + 1];
+				
+				// Rule 1
+				tmp = firstTable[nextToken];
+				followTable[token].insert(tmp.begin(), tmp.end());
+				cout << "add First(" + token + ")" << endl;
+
+				// Rule 2
+				if(nullable(nextToken)) {
+					followTable[token].insert(nextToken);	
+					cout << "add Follow(" + nextToken + ")" << endl;
+
+				// Rule 3
+					followTable[token].insert(lhs);
+					cout << "add Follow(" + lhs + ")" << endl;
+				}
+
+				// Rule 4
+				followTable[token].insert(lhs);
+				cout << "add Follow(" + lhs + ")" << endl;
+			}
+		}
+	}
+
+	cout << "====================================================" << endl;
+}
+
 int main() {
 
 	GRAMMAR::iterator it;
@@ -190,6 +242,7 @@ int main() {
 
 	readFile(fileName);
 
+	/* check nullable works */
 	/*
 	for (it = grammar.begin(); it != grammar.end(); it++) {
 		LHS lhs = it -> first;
@@ -206,6 +259,7 @@ int main() {
 
 
 	/* show all elements in the firstTable */
+	/*
 	map<LHS, set<string> >:: iterator itFirst;
 	set<string>:: iterator itSet;
 
@@ -219,8 +273,26 @@ int main() {
 			}
 			cout << endl;
 		}
+	}*/
+
+	for (it = grammar.begin(); it != grammar.end(); it++) {
+		LHS lhs = it -> first;
+		getFollow(lhs);
 	}
 
+	map<LHS, set<string> >:: iterator itFirst;
+	set<string>:: iterator itSet;
 
+	for (itFirst = followTable.begin(); itFirst != followTable.end(); itFirst++) {
+		LHS lhs = itFirst -> first;
+		if (isNonterminal(lhs)) {
+			cout << lhs + ": ";
+		
+			for (itSet = followTable[lhs].begin(); itSet != followTable[lhs].end(); itSet++) {
+				cout << *itSet + " ";	
+			}
+			cout << endl;
+		}
+	}
 	return 0;	
 }
