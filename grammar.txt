@@ -7,12 +7,12 @@ VarDecl
     Type id VarDecl'
 VarDecl'
     ;
-    [num] ;
+    [ num ] ;
 FunDeclList
     FunDecl FunDeclList'
 FunDeclList'
     epsilon
-    FundeclList
+    FunDeclList
 FunDecl
     Type id ( ParamDeclList ) Block
 ParamDeclList
@@ -54,6 +54,7 @@ Expr'
     = Expr
     [ Expr ] = Expr
 Expr''
+    epsilon
     BinOp Expr Expr''
 Primary
     id Primary'
