@@ -132,20 +132,19 @@ set<string> getFirst(LHS lhs) {
 	RHS rhs = grammar.find(lhs)	-> second;
 	set<string> list;
 
-	if (!isNonterminal(lhs) && firstTable[lhs].size() == 0) {
-		firstTable[lhs].insert(lhs);
-	}
-
 	/* check the table to find if we have done the LHS before 
 	 * if we have, then return the set in the table instead of
 	 * going ahead.
 	 */
-	if (firstTable[lhs].size() != 0) 
+	
+	if (firstTable[lhs].size() != 0) {
 		return firstTable[lhs];
+	}
 
 	/* if lhs is epsilon , then return null set */
-	if (lhs == "epsilon") 
+	if (lhs == "epsilon") {
 		return list;
+	}
 
 	/*
 	 * check if lhs is terminal, if yes, then insert lhs into
