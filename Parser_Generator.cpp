@@ -305,16 +305,35 @@ int main() {
 
 	readFile(fileName);
 
+	/*	
+	for (map<LHS, RHS>::iterator it = grammar.begin(); it != grammar.end(); it++) {
+		LHS lhs = it -> first;
+		RHS rhs = it -> second;
+		cout << "LHS : " << lhs << endl;
+		for (int j = 0; j != rhs.size(); j++) {
+			for (int k = 0; k != rhs[j].size(); k++) {
+				cout << rhs[j][k] << " ";
+			}
+			cout << endl;
+		}
+	}*/
+
 	/* check nullable works */
+	
 	/*
 	for (it = grammar.begin(); it != grammar.end(); it++) {
 		LHS lhs = it -> first;
-		//if(lhs == "VarDeclList")
-			if(nullable(lhs)) {
-				cout << lhs << " is nullable." << endl;
-			}
-	} */
+		if(lhs == "FunDecl")
+		if(nullable(lhs)) {
+			cout << lhs << " is nullable." << endl;
+		}
+		else {
+			cout << lhs << " isn't nullable" << endl;	
+		}
+	} 
+	*/
 
+	
 	for (it = grammar.begin(); it != grammar.end(); it++) {
 		LHS lhs = it -> first;
 		firstTable[lhs] = getFirst(lhs);
@@ -322,7 +341,9 @@ int main() {
 
 
 	/* show all elements in the firstTable */
-	/*
+	
+		
+/*	
 	map<LHS, set<string> >:: iterator itFirst;
 	set<string>:: iterator itSet;
 
@@ -336,12 +357,15 @@ int main() {
 			}
 			cout << endl;
 		}
-	}*/
-
+	}
+*/
+	
 	for (it = grammar.begin(); it != grammar.end(); it++) {
 		LHS lhs = it -> first;
 		getFollow(lhs);
 	}
+
+	eliminateNonterminal();
 
 	map<LHS, set<string> >:: iterator itFirst;
 	set<string>:: iterator itSet;
