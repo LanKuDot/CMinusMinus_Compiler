@@ -96,7 +96,7 @@ bool isNonterminal(string s) {
 
 bool nullable(LHS lhs) {
 
-	if(!isNonterminal(lhs)) return false;
+	if(!isNonterminal(lhs) && lhs != "epsilon") return false;
 
 	RHS rhs = grammar.find(lhs) -> second;
 	// check all rules
