@@ -200,35 +200,37 @@ void getFollow(LHS lhs) {
 				nextToken = rhs[i][j + 1];
 				
 				// Rule 1
-				tmp = firstTable[nextToken];
-				followTable[token].insert(tmp.begin(), tmp.end());
-				cout << token + " add First(" + nextToken + ")" << endl;
+				if (isNonterminal(nextToken)) {
+					tmp = firstTable[nextToken];
+					followTable[token].insert(tmp.begin(), tmp.end());
+					// cout << "1. " + token + " add First(" + nextToken + ")" << endl;
+				} else {
+					followTable[token].insert(nextToken);
+					// cout << "1. " + token + " add " + nextToken << endl;
+				}
 
 				// Rule 2
-				if(isNonterminal(token)) {
+				if (isNonterminal(token)) {
 					if(nullable(nextToken)) {
 						followTable[token].insert(nextToken);	
-						cout << token + " add Follow(" + nextToken + ")" << endl;
+						// cout << "2. " + token + " add Follow(" + nextToken + ")" << endl;
 
 				// Rule 3
 						followTable[token].insert(lhs);
-						cout << token + " add Follow(" + lhs + ")" << endl;
+						// cout << "3. " + token + " add Follow(" + lhs + ")" << endl;
+					} else {
+						// cout << nextToken + " is not nullable" << endl;	
 					}
-				// Rule 4
-					followTable[token].insert(lhs);
-					cout << token + " add Follow(" + lhs + ")" << endl;
-			
 				}
 			} else {
 				if (isNonterminal(token)) {
+				// Rule 4
 					followTable[token].insert(lhs);
-					cout << "123" + token + " add Follow(" + lhs + ")" << endl;
+					// cout << "4. " + token + " add Follow(" + lhs + ")" << endl;
 				}
 			}
 		}
 	}
-	
-		cout << "====================================================" << endl;
 }
 
 void eliminateNonterminal (LHS lhs) {
