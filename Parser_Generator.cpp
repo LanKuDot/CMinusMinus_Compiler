@@ -233,12 +233,68 @@ void getFollow(LHS lhs) {
 	}
 }
 
-void eliminateNonterminal (LHS lhs) {
+/******************************************************
+ * function eliminateNonterminal() :
+ * must be done after getFollow() 
+ * Eliminate all nonterminal in followTable
+ * [NOTE]: This code is so ugly....who can help me....
+ ******************************************************/
+void eliminateNonterminal () {
 	/*
-	 * TODO : scanning the followTable[lhs] and if there is nonterminal
-	 * find followTable[nonterminal] and replace the nonterminal in followTable[lhs]
-	 * with followTable[nonterminal]
 	 */
+	map<LHS, set<string> >:: iterator itMap;
+	set<string>:: iterator itSet;
+
+	// delete the situation : 
+	// expr -> expr expr'' , the expr is duplicated, we have to delete the rhs of expr
+	// to eliminate infinite loop.
+	for(int i = 0; i != followTable.size(); i++) {
+		for (itMap = followTable.begin(); itMap != followTable.end(); itMap++) {
+			LHS lhs = itMap -> first;
+			if (isNonterminal(lhs)) {
+				for (itSet = followTable[lhs].begin(); itSet != followTable[lhs].end(); itSet++) {
+					string token = *itSet;
+					if (token == lhs) {
+						followTable[lhs].erase(token);
+					}
+				}
+			}
+		}
+	}
+
+	// scanning the followTable[lhs] and if there is nonterminal
+	// find followTable[nonterminal] and add the followTable[nonterminal]
+	for(int i = 0; i != followTable.size(); i++) {
+		for (itMap = followTable.begin(); itMap != followTable.end(); itMap++) {
+			LHS lhs = itMap -> first;
+			if (isNonterminal(lhs)) {
+				for (itSet = followTable[lhs].begin(); itSet != followTable[lhs].end(); itSet++) {
+					string token = *itSet;
+					if (isNonterminal(token)) {
+						set<string> tmp = followTable[token];
+						followTable[lhs].insert(tmp.begin(), tmp.end());
+					}
+				}
+			}
+		}
+	}	
+
+	// delete all nonterminal
+	
+	for(int i = 0; i != followTable.size(); i++) {
+		for (itMap = followTable.begin(); itMap != followTable.end(); itMap++) {
+			LHS lhs = itMap -> first;
+			if (isNonterminal(lhs)) {
+				for (itSet = followTable[lhs].begin(); itSet != followTable[lhs].end(); itSet++) {
+					string token = *itSet;
+					if (isNonterminal(token)) {
+						followTable[lhs].erase(token);
+					}
+				}
+			}
+		}
+	}
+
 	return ;
 }
 
