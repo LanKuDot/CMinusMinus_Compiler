@@ -169,8 +169,13 @@ set<string> getFirst(LHS lhs) {
 }
 
 
+/**************************************************************************
+ * function : getFollow(LHS lhs)
+ * input the lhs and it will found the Follow(lhs) and fill the result
+ * into the followTable
+ **************************************************************************/
 void getFollow(LHS lhs) {
-	cout << "[START] getFollow : Follow(" + lhs + "): "<< endl;
+	//cout << "[START] getFollow : Follow(" + lhs + "): "<< endl;
 
 	RHS rhs = grammar.find(lhs) -> second;
 	set<string> tmp;
