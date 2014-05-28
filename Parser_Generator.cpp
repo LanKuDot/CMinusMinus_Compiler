@@ -82,21 +82,6 @@ void readFile(const char * fileName) {
 		cout << "Unable to open file." << endl;
 	}
 
-	
-/*
-	for (map<LHS, RHS>::iterator it = grammar.begin(); it != grammar.end(); it++) {
-		LHS lhs = it -> first;
-		RHS rhs = it -> second;
-		cout << "LHS : " << lhs << endl;
-		for (int j = 0; j != rhs.size(); j++) {
-			for (int k = 0; k != rhs[j].size(); k++) {
-				cout << rhs[j][k] << " ";
-			}
-			cout << endl;
-		}
-	}
-*/
-
 	return;
 }
 
