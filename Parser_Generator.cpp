@@ -19,6 +19,7 @@ bool nullable(LHS);
 set<string> getFirst(LHS);
 void getFollow();
 void eliminateNonterminal();
+void getLLTable();
 
 GRAMMAR grammar;
 map<LHS, set<string> > firstTable;
@@ -136,7 +137,6 @@ set<string> getFirst(LHS lhs) {
 	 * if we have, then return the set in the table instead of
 	 * going ahead.
 	 */
-	
 	if (firstTable[lhs].size() != 0) {
 		return firstTable[lhs];
 	}
@@ -144,6 +144,9 @@ set<string> getFirst(LHS lhs) {
 	/* if lhs is epsilon , then return null set */
 	if (lhs == "epsilon") {
 		return list;
+	}
+	if (!isNonterminal(lhs) && firstTable[lhs].size() == 0) {
+		firstTable[lhs].insert(lhs);
 	}
 
 	/*
@@ -333,49 +336,84 @@ int main() {
 	} 
 	*/
 
-	
-	for (it = grammar.begin(); it != grammar.end(); it++) {
+	for (map<LHS, RHS>::iterator it = grammar.begin(); it != grammar.end(); it++) {
 		LHS lhs = it -> first;
+		RHS rhs = it -> second;
+
 		firstTable[lhs] = getFirst(lhs);
+		cout << "LHS: " + lhs << endl;
+
+	/* show all elements in the firstTable */
+	cout << "First : " << endl;
+	cout << "=============================" << endl;
+	for (map<LHS, set<string> >::iterator itFirst = firstTable.begin(); itFirst != firstTable.end(); itFirst++) {
+		LHS lhs = itFirst -> first;
+	//	if (isNonterminal(lhs)) {
+			cout << lhs + ": ";
+		
+			for (set<string>::iterator itSet = firstTable[lhs].begin(); itSet != firstTable[lhs].end(); itSet++) {
+				cout << *itSet + " ";	
+			}
+			cout << endl;
+	//	}
+	}
+
+
+		for (int i = 0; i != rhs.size(); i++) {
+			for (int j = 0; j != rhs[i].size(); j++) {
+				cout << "RHS: " + rhs[i][j] << endl;
+				firstTable[rhs[i][j]] = getFirst(rhs[i][j]);
+	/* show all elements in the firstTable */
+cout << "First : " << endl;
+cout << "=============================" << endl;
+for (map<LHS, set<string> >::iterator itFirst = firstTable.begin(); itFirst != firstTable.end(); itFirst++) {
+	LHS lhs = itFirst -> first;
+//	if (isNonterminal(lhs)) {
+		cout << lhs + ": ";
+	
+		for (set<string>::iterator itSet = firstTable[lhs].begin(); itSet != firstTable[lhs].end(); itSet++) {
+			cout << *itSet + " ";	
+		}
+		cout << endl;
+//	}
+}
+
+
+			}
+		}
 	}
 
 
 	/* show all elements in the firstTable */
-	
-		
-/*	
-	map<LHS, set<string> >:: iterator itFirst;
-	set<string>:: iterator itSet;
-
-	for (itFirst = firstTable.begin(); itFirst != firstTable.end(); itFirst++) {
+	cout << "First : " << endl;
+	cout << "=============================" << endl;
+	for (map<LHS, set<string> >::iterator itFirst = firstTable.begin(); itFirst != firstTable.end(); itFirst++) {
 		LHS lhs = itFirst -> first;
-		if (isNonterminal(lhs)) {
+	//	if (isNonterminal(lhs)) {
 			cout << lhs + ": ";
 		
-			for (itSet = firstTable[lhs].begin(); itSet != firstTable[lhs].end(); itSet++) {
+			for (set<string>::iterator itSet = firstTable[lhs].begin(); itSet != firstTable[lhs].end(); itSet++) {
 				cout << *itSet + " ";	
 			}
 			cout << endl;
-		}
+	//	}
 	}
-*/
+
 	
 	for (it = grammar.begin(); it != grammar.end(); it++) {
 		LHS lhs = it -> first;
 		getFollow(lhs);
 	}
-
 	eliminateNonterminal();
 
-	map<LHS, set<string> >:: iterator itFirst;
-	set<string>:: iterator itSet;
-
-	for (itFirst = followTable.begin(); itFirst != followTable.end(); itFirst++) {
+	cout << "Follow : " << endl;
+	cout << "=============================" << endl;
+	for (map<LHS, set<string> >:: iterator itFirst = followTable.begin(); itFirst != followTable.end(); itFirst++) {
 		LHS lhs = itFirst -> first;
 		if (isNonterminal(lhs)) {
 			cout << lhs + ": ";
 		
-			for (itSet = followTable[lhs].begin(); itSet != followTable[lhs].end(); itSet++) {
+			for (set<string>:: iterator itSet = followTable[lhs].begin(); itSet != followTable[lhs].end(); itSet++) {
 				cout << *itSet + " ";	
 			}
 			cout << endl;
