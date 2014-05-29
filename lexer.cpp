@@ -57,6 +57,11 @@ int lexial_analyzer( const char *source_file )
 		{
 			category = start( token, 0 );
 
+			// Get a comment token then ignore the remain
+			// input in that line.
+			if ( category == COMMENT )
+				break;
+
 			fprintf( output_fp, "        %-12s : %s\n", \
 					category_str[category], token );
 
@@ -98,6 +103,17 @@ enum Category start( char *input, int now )
 				return ERROR;
 			else
 				return OPERATOR;
+
+		/* Divide and comment both begin with '/' */
+		case '/':
+			// The token contains only '/'.
+			if ( strlen( input ) == 1 )
+				return OPERATOR;
+			// The token begins with "//".
+			else if ( input[ ++now ] == '/' )
+				return COMMENT;
+			else
+				return ERROR;
 
 		default:
 			return ERROR;
