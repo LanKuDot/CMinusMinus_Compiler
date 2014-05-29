@@ -145,7 +145,13 @@ bool isNonterminal(string s) {
 
 bool nullable(LHS lhs) {
 
-	if(!isNonterminal(lhs) && lhs != "epsilon") return false;
+	if(!isNonterminal(lhs) ) {
+		if(lhs == "epsilon") {
+			return true;		
+		} else {
+			return false;	
+		}
+	}
 
 	RHS rhs = grammar.find(lhs) -> second;
 	// check all rules
