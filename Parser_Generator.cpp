@@ -501,38 +501,7 @@ int main() {
 			cout << endl;
 		}
 	}
+
+	getLLTable();
 	return 0;	
 }
-void createSet() {
-	for (map<LHS, RHS>::iterator it = grammar.begin(); it != grammar.end(); it++) {
-		LHS lhs = it -> first;
-		RHS rhs = it -> second;
-
-		if(isNonterminal(lhs)) {
-			nonterminal.insert(lhs);
-		}
-		for (int i = 0; i != rhs.size(); i++) {
-			for (int j = 0; j != rhs[i].size(); j++) {
-				if (isNonterminal(rhs[i][j])) {
-					nonterminal.insert(rhs[i][j]);	
-				} else {
-					terminal.insert(rhs[i][j]);
-				}
-			}
-		}
-	}
-
-/*  print all symbol	*/
- 	cout << "[terminal]" << endl;
- 	for (set<string>:: iterator itSet = terminal.begin(); itSet != terminal.end(); itSet++) {
- 				cout << *itSet + " ";	
- 	}
- 	cout << endl;
- 	cout << "[nonterminal]" << endl;
- 	for (set<string>:: iterator itSet = nonterminal.begin(); itSet != nonterminal.end(); itSet++) {
- 			cout << *itSet + " ";	
- 	}
- 	cout << endl;
-
-}
-
