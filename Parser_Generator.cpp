@@ -41,7 +41,6 @@ void readFile(const char * fileName) {
 
 	if (fin.is_open()) {
 		while (1) {
-			//cout << "Parsing : " << line << endl;
 			if(!getline(fin, line)) break;
 			if (line.at(line.length() - 1) == '\r') {
 				line = line.substr(0, line.length() - 1);
@@ -53,19 +52,13 @@ void readFile(const char * fileName) {
 				index = 0;
 				// clear lhs and rhs for next grammar
 				lhs = ""; rhs.clear();
-				//cout << "lhs : " << line << endl;
-
 				lhs = line;
 			} else {
-				//cout << "rhs : " << endl;
-				//cout << "rule" << index << " : "<< line << endl;	
-
 				istringstream iss(line);
 				vector<string> tmp;
 				// split line into tokens with whitespaces chars
 				while (iss) {
 					string token;
-
 					/*
 					cout << "check tokeN " << endl;
 					while(iss.good())
@@ -76,7 +69,6 @@ void readFile(const char * fileName) {
 					iss >> token;
 					
 					if (token != "") {
-						// cout << "SubString : " << token << endl;
 						tmp.push_back(token); 
 					}
 				};
@@ -460,56 +452,22 @@ int main() {
 	} 
 	*/
 
+	// create first table
 	for (map<LHS, RHS>::iterator it = grammar.begin(); it != grammar.end(); it++) {
 		LHS lhs = it -> first;
 		RHS rhs = it -> second;
 
 		firstTable[lhs] = getFirst(lhs);
-		cout << "LHS: " + lhs << endl;
-
-	/* show all elements in the firstTable */
-	cout << "First : " << endl;
-	cout << "=============================" << endl;
-	for (map<LHS, set<string> >::iterator itFirst = firstTable.begin(); itFirst != firstTable.end(); itFirst++) {
-		LHS lhs = itFirst -> first;
-	//	if (isNonterminal(lhs)) {
-			cout << lhs + ": ";
-		
-			for (set<string>::iterator itSet = firstTable[lhs].begin(); itSet != firstTable[lhs].end(); itSet++) {
-				cout << *itSet + " ";	
-			}
-			cout << endl;
-	//	}
-	}
-
-
 		for (int i = 0; i != rhs.size(); i++) {
 			for (int j = 0; j != rhs[i].size(); j++) {
-				cout << "RHS: " + rhs[i][j] << endl;
 				firstTable[rhs[i][j]] = getFirst(rhs[i][j]);
-	/* show all elements in the firstTable */
-cout << "First : " << endl;
-cout << "=============================" << endl;
-for (map<LHS, set<string> >::iterator itFirst = firstTable.begin(); itFirst != firstTable.end(); itFirst++) {
-	LHS lhs = itFirst -> first;
-//	if (isNonterminal(lhs)) {
-		cout << lhs + ": ";
-	
-		for (set<string>::iterator itSet = firstTable[lhs].begin(); itSet != firstTable[lhs].end(); itSet++) {
-			cout << *itSet + " ";	
-		}
-		cout << endl;
-//	}
-}
-
-
 			}
 		}
 	}
 
 
 	/* show all elements in the firstTable */
-	cout << "First : " << endl;
+	cout << "[First]" << endl;
 	cout << "=============================" << endl;
 	for (map<LHS, set<string> >::iterator itFirst = firstTable.begin(); itFirst != firstTable.end(); itFirst++) {
 		LHS lhs = itFirst -> first;
@@ -530,7 +488,7 @@ for (map<LHS, set<string> >::iterator itFirst = firstTable.begin(); itFirst != f
 	}
 	eliminateNonterminal();
 
-	cout << "Follow : " << endl;
+	cout << "[Follow]" << endl;
 	cout << "=============================" << endl;
 	for (map<LHS, set<string> >:: iterator itFirst = followTable.begin(); itFirst != followTable.end(); itFirst++) {
 		LHS lhs = itFirst -> first;
