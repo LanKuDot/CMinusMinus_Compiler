@@ -73,16 +73,22 @@ int lexial_analyzer( const char *source_file )
 
 enum Category start( char *input, int now )
 {
-	/* Numbers: goto state Number
-	 * ASCII code: '0' is 48, '9' is 57. */
-	if ( input[ now ] > 47 && input[ now ] < 58 )
-		return number( input, ++now );
-	else
-		return ERROR;
+	switch ( input[now] )
+	{
+		/* Got a number: goto state Number */
+		case '0' ... '9':
+			return number( input, ++now );
+			break;
+		default:
+			return ERROR;
+			break;
+	}
 }	// end of start()
 
 enum Category number( char *input, int now )
 {
+	/* At the state Number, the token must be all numbers,
+	 * otherwise, the tokem is invaild. */
 	while( now < strlen( input ) )
 	{
 		if ( input[ now ] > 47 && input[ now ] < 58 )
