@@ -23,6 +23,9 @@ void getFollow();
 void eliminateNonterminal();
 void getLLTable();
 
+set<string> terminal;
+set<string> nonterminal;
+
 GRAMMAR grammar;
 map<LHS, set<string> > firstTable;
 map<LHS, set<string> > followTable;
@@ -86,6 +89,39 @@ void readFile(const char * fileName) {
 	}
 
 	return;
+}
+
+void createSet() {
+	for (map<LHS, RHS>::iterator it = grammar.begin(); it != grammar.end(); it++) {
+		LHS lhs = it -> first;
+		RHS rhs = it -> second;
+
+		if(isNonterminal(lhs)) {
+			nonterminal.insert(lhs);
+		}
+		for (int i = 0; i != rhs.size(); i++) {
+			for (int j = 0; j != rhs[i].size(); j++) {
+				if (isNonterminal(rhs[i][j])) {
+					nonterminal.insert(rhs[i][j]);	
+				} else {
+					terminal.insert(rhs[i][j]);
+				}
+			}
+		}
+	}
+
+/*  print all symbol	*/
+ 	cout << "[terminal]" << endl;
+ 	for (set<string>:: iterator itSet = terminal.begin(); itSet != terminal.end(); itSet++) {
+ 				cout << *itSet + " ";	
+ 	}
+ 	cout << endl;
+ 	cout << "[nonterminal]" << endl;
+ 	for (set<string>:: iterator itSet = nonterminal.begin(); itSet != nonterminal.end(); itSet++) {
+ 			cout << *itSet + " ";	
+ 	}
+ 	cout << endl;
+
 }
 
 bool isNonterminal(string s) {
@@ -309,6 +345,8 @@ int main() {
 	const char * fileName = "grammar.txt";
 
 	readFile(fileName);
+	// create terminal and nonterminal set
+	createSet();
 
 	/*	
 	for (map<LHS, RHS>::iterator it = grammar.begin(); it != grammar.end(); it++) {
