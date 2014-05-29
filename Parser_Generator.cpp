@@ -238,7 +238,7 @@ void getFollow(LHS lhs) {
 	// 
 
 	// if lhs is start symbol, add $ 
-	if (lhs == "Program") { followTable[lhs].insert("$"); }
+	//if (lhs == "Program") { followTable[lhs].insert("$"); }
 
 	for (int i = 0; i != rhs.size(); i++) {
 		for (int j = 0; j != rhs[i].size(); j++) {
