@@ -6,6 +6,7 @@
 #include <vector>
 #include <string>
 #include <set>
+#include <iomanip>
 using namespace std;
 
 typedef string LHS;
@@ -14,6 +15,7 @@ typedef vector< vector<string> > RHS;
 typedef map<LHS, RHS> GRAMMAR;
 
 void readFile(const char *);
+void createSet();
 bool isNonterminal(LHS);
 bool nullable(LHS);
 set<string> getFirst(LHS);
@@ -21,9 +23,14 @@ void getFollow();
 void eliminateNonterminal();
 void getLLTable();
 
+set<string> terminal;
+set<string> nonterminal;
+
 GRAMMAR grammar;
 map<LHS, set<string> > firstTable;
 map<LHS, set<string> > followTable;
+map<LHS, map<string, vector<string> > > LLTable;
+
 
 void readFile(const char * fileName) {
 	ifstream fin (fileName);
@@ -34,7 +41,6 @@ void readFile(const char * fileName) {
 
 	if (fin.is_open()) {
 		while (1) {
-			//cout << "Parsing : " << line << endl;
 			if(!getline(fin, line)) break;
 			if (line.at(line.length() - 1) == '\r') {
 				line = line.substr(0, line.length() - 1);
@@ -46,19 +52,13 @@ void readFile(const char * fileName) {
 				index = 0;
 				// clear lhs and rhs for next grammar
 				lhs = ""; rhs.clear();
-				//cout << "lhs : " << line << endl;
-
 				lhs = line;
 			} else {
-				//cout << "rhs : " << endl;
-				//cout << "rule" << index << " : "<< line << endl;	
-
 				istringstream iss(line);
 				vector<string> tmp;
 				// split line into tokens with whitespaces chars
 				while (iss) {
 					string token;
-
 					/*
 					cout << "check tokeN " << endl;
 					while(iss.good())
@@ -69,7 +69,6 @@ void readFile(const char * fileName) {
 					iss >> token;
 					
 					if (token != "") {
-						// cout << "SubString : " << token << endl;
 						tmp.push_back(token); 
 					}
 				};
@@ -83,7 +82,48 @@ void readFile(const char * fileName) {
 		cout << "Unable to open file." << endl;
 	}
 
+	
+	rhs.clear();
+	vector<string> tmp;
+	tmp.push_back("Program");
+	tmp.push_back("$");
+	rhs.push_back(tmp);
+	grammar.insert(pair<LHS, RHS>("S", rhs));
+
 	return;
+}
+
+void createSet() {
+	for (map<LHS, RHS>::iterator it = grammar.begin(); it != grammar.end(); it++) {
+		LHS lhs = it -> first;
+		RHS rhs = it -> second;
+
+		if(isNonterminal(lhs)) {
+			nonterminal.insert(lhs);
+		}
+		for (int i = 0; i != rhs.size(); i++) {
+			for (int j = 0; j != rhs[i].size(); j++) {
+				if (isNonterminal(rhs[i][j])) {
+					nonterminal.insert(rhs[i][j]);	
+				} else {
+					terminal.insert(rhs[i][j]);
+				}
+			}
+		}
+	}
+
+/*  print all symbol	*/
+ 	cout << "[terminal]" << endl;
+ 	for (set<string>:: iterator itSet = terminal.begin(); itSet != terminal.end(); itSet++) {
+ 				cout << *itSet + " ";	
+ 	}
+ 	cout << endl;
+ 	cout << "[nonterminal]" << endl;
+ 	for (set<string>:: iterator itSet = nonterminal.begin(); itSet != nonterminal.end(); itSet++) {
+ 			cout << *itSet + " ";	
+ 	}
+ 	cout << endl;
+
 }
 
 bool isNonterminal(string s) {
@@ -97,7 +137,13 @@ bool isNonterminal(string s) {
 
 bool nullable(LHS lhs) {
 
-	if(!isNonterminal(lhs) && lhs != "epsilon") return false;
+	if(!isNonterminal(lhs) ) {
+		if(lhs == "epsilon") {
+			return true;		
+		} else {
+			return false;	
+		}
+	}
 
 	RHS rhs = grammar.find(lhs) -> second;
 	// check all rules
@@ -192,7 +238,7 @@ void getFollow(LHS lhs) {
 	// 
 
 	// if lhs is start symbol, add $ 
-	if (lhs == "Program") { followTable[lhs].insert("$"); }
+	//if (lhs == "Program") { followTable[lhs].insert("$"); }
 
 	for (int i = 0; i != rhs.size(); i++) {
 		for (int j = 0; j != rhs[i].size(); j++) {
@@ -301,12 +347,82 @@ void eliminateNonterminal () {
 	return ;
 }
 
+void getLLTable() {
+	for (map<LHS, RHS>::iterator it = grammar.begin(); it != grammar.end(); it++) {
+		LHS lhs = it -> first;
+		RHS rhs = it -> second;
+		set<string>firstOfLHS = firstTable[lhs];
+
+		// all input will be terminal, so we find all productions that will create that input
+		// in the terminal set.
+		for (set<string>::iterator input = terminal.begin(); input != terminal.end(); input++) {
+			// each production
+			// cout << "check " << *input << endl;
+			for	(int i = 0; i != rhs.size(); i++) {
+				// each token in the production
+				// cout << "production : " << i << endl;
+				for (int j = 0; j != rhs[i].size(); j++) {
+					// Rule : FIRST(rhs[i][j]) contains input
+					// ex. T' -> T$  T -> aTc and input = a, FIRST(T) contains "a"
+					//	   so we can fill the table like this
+					//       | input: a | .....
+					//    ---|----------|-----------
+					//     T'| T' -> T$ | .....
+					
+					if (firstTable[rhs[i][j]].find(*input) != firstTable[rhs[i][j]].end()) {
+						LLTable[lhs].insert(pair<string, vector<string> >(*input, rhs[i]));
+						// cout << "rule 1 - find " << *input << " insert " << "rhs[" << i << "]" << endl;
+					}
+
+					// Rule : FOLLOW(lhs) contains input , and this production can derive ""epsilon
+					// then add this production.
+					
+					// if the last token of this is "also" nullable
+					// check if the FOLLOW(lhs) contains input
+					if ((j == (rhs[i].size() - 1)) && nullable(rhs[i][j])) {
+						if (followTable[lhs].find(*input) != followTable[lhs].end() ) {
+							// cout << "rule 2 - find" << *input << " insert "<< "rhs[" << i << "]" << endl;
+
+							LLTable[lhs].insert(pair<string, vector<string> >(*input, rhs[i]));
+						}
+					}
+
+					// if the token in this production isn't nullable or is terminal, we don't need to 
+					// move to next token, everything need to check is done above.
+					if(!nullable(rhs[i][j]) || !isNonterminal(rhs[i][j]))
+						break;
+				}
+			}	
+		}
+	}
+
+	
+	/* print the LLTable */
+//	for (map<LHS, map<string, vector<string> > >::iterator it = LLTable.begin(); it != LLTable.end(); it++) {
+//		LHS lhs = it -> first;
+//		map<string, vector<string> > tmp = it -> second;
+//
+//		for(map<string, vector<string> >::iterator it_tmp = tmp.begin(); it_tmp != tmp.end(); it_tmp++) {
+//			string input = it_tmp -> first;
+//			vector<string> production = it_tmp -> second;
+//			cout << setw(22) << left << lhs << setw(11) << input;
+//			for (int i = 0; i != production.size(); i++) {
+//				cout << production[i] + " ";
+//			}
+//			cout << endl;
+//		}
+//	}
+	
+}
+
 int main() {
 
 	GRAMMAR::iterator it;
 	const char * fileName = "grammar.txt";
 
 	readFile(fileName);
+	// create terminal and nonterminal set
+	createSet();
 
 	/*	
 	for (map<LHS, RHS>::iterator it = grammar.begin(); it != grammar.end(); it++) {
@@ -336,56 +452,22 @@ int main() {
 	} 
 	*/
 
+	// create first table
 	for (map<LHS, RHS>::iterator it = grammar.begin(); it != grammar.end(); it++) {
 		LHS lhs = it -> first;
 		RHS rhs = it -> second;
 
 		firstTable[lhs] = getFirst(lhs);
-		cout << "LHS: " + lhs << endl;
-
-	/* show all elements in the firstTable */
-	cout << "First : " << endl;
-	cout << "=============================" << endl;
-	for (map<LHS, set<string> >::iterator itFirst = firstTable.begin(); itFirst != firstTable.end(); itFirst++) {
-		LHS lhs = itFirst -> first;
-	//	if (isNonterminal(lhs)) {
-			cout << lhs + ": ";
-		
-			for (set<string>::iterator itSet = firstTable[lhs].begin(); itSet != firstTable[lhs].end(); itSet++) {
-				cout << *itSet + " ";	
-			}
-			cout << endl;
-	//	}
-	}
-
-
 		for (int i = 0; i != rhs.size(); i++) {
 			for (int j = 0; j != rhs[i].size(); j++) {
-				cout << "RHS: " + rhs[i][j] << endl;
 				firstTable[rhs[i][j]] = getFirst(rhs[i][j]);
-	/* show all elements in the firstTable */
-cout << "First : " << endl;
-cout << "=============================" << endl;
-for (map<LHS, set<string> >::iterator itFirst = firstTable.begin(); itFirst != firstTable.end(); itFirst++) {
-	LHS lhs = itFirst -> first;
-//	if (isNonterminal(lhs)) {
-		cout << lhs + ": ";
-	
-		for (set<string>::iterator itSet = firstTable[lhs].begin(); itSet != firstTable[lhs].end(); itSet++) {
-			cout << *itSet + " ";	
-		}
-		cout << endl;
-//	}
-}
-
-
 			}
 		}
 	}
 
 
 	/* show all elements in the firstTable */
-	cout << "First : " << endl;
+	cout << "[First]" << endl;
 	cout << "=============================" << endl;
 	for (map<LHS, set<string> >::iterator itFirst = firstTable.begin(); itFirst != firstTable.end(); itFirst++) {
 		LHS lhs = itFirst -> first;
@@ -406,7 +488,7 @@ for (map<LHS, set<string> >::iterator itFirst = firstTable.begin(); itFirst != f
 	}
 	eliminateNonterminal();
 
-	cout << "Follow : " << endl;
+	cout << "[Follow]" << endl;
 	cout << "=============================" << endl;
 	for (map<LHS, set<string> >:: iterator itFirst = followTable.begin(); itFirst != followTable.end(); itFirst++) {
 		LHS lhs = itFirst -> first;
@@ -419,5 +501,7 @@ for (map<LHS, set<string> >::iterator itFirst = firstTable.begin(); itFirst != f
 			cout << endl;
 		}
 	}
+
+	getLLTable();
 	return 0;	
 }
