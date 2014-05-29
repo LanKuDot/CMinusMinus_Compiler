@@ -5,6 +5,12 @@
 
 using namespace std;
 
+/* Analyzing states
+ * input : the token to be analyzing.
+ * now   : the now-th character is the next char to analyze. */
+enum Category start( char *input, int now );
+enum Category number( char *input, int now );
+
 /*
  * Open and read the source code from "source_file".
  * Do lexial analyzing and generate a token table which
@@ -32,7 +38,8 @@ int lexial_analyzer( const char *source_file )
 		// Analyze the category of the input token
 		while ( token != NULL )
 		{
-			cout << token << endl;
+			category = start( token, 0 );
+
 			token = strtok( NULL, " \n\t\r" );
 		}
 	}
@@ -42,3 +49,26 @@ int lexial_analyzer( const char *source_file )
 
 	return 0;
 }	// end of lexial_analyzer()
+
+enum Category start( char *input, int now )
+{
+	/* Numbers: goto state Number
+	 * ASCII code: '0' is 48, '9' is 57. */
+	if ( input[ now ] > 47 && input[ now ] < 58 )
+		return number( input, ++now );
+	else
+		return ERROR;
+}	// end of start()
+
+enum Category number( char *input, int now )
+{
+	while( now < strlen( input ) )
+	{
+		if ( input[ now ] > 47 && input[ now ] < 58 )
+			++now;
+		else
+			return ERROR;
+	}
+
+	return NUMBER;
+}	// end of number()
