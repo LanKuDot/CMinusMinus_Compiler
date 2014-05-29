@@ -125,6 +125,14 @@ enum Category start( char *input, int now )
 			else
 				return ERROR;
 
+		/* Relational operators and assignment operator "=" */
+		case '=': case '!':
+		case '<': case '>':
+			if ( strlen( input ) == 1 || ( strlen( input ) < 3 && ( input[now+1] == '=' )))
+				return OPERATOR;
+			else
+				return ERROR;
+
 		default:
 			return ERROR;
 			break;

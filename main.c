@@ -12,3 +12,7 @@ int y ;
 int doub ( int c , int d ) {
 	return c * d ;
 }
+
+// This is comment
+;121 +12 12- ;; && || & | &= |= &&= ||=
+== != = ! =: <= <<=
