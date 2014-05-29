@@ -91,6 +91,14 @@ enum Category start( char *input, int now )
 			else
 				return SPECIAL_SYMBOL;
 
+		/* Plus, minus, and multiply */
+		case '+' : case '-' :
+		case '*' :
+			if ( strlen( input ) != 1 )
+				return ERROR;
+			else
+				return OPERATOR;
+
 		default:
 			return ERROR;
 			break;
