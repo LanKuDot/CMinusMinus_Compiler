@@ -115,6 +115,16 @@ enum Category start( char *input, int now )
 			else
 				return ERROR;
 
+		/* AND and OR operator */
+		case '&': case '|':
+			// && and || is vaild, and cannot conatin
+			// other characters.
+			if ( strlen( input ) < 3 &&
+					( input[now] == input[now+1] ) )
+				return OPERATOR;
+			else
+				return ERROR;
+
 		default:
 			return ERROR;
 			break;
