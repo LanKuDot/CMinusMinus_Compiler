@@ -15,6 +15,7 @@ typedef vector< vector<string> > RHS;
 typedef map<LHS, RHS> GRAMMAR;
 
 void readFile(const char *);
+void createSet();
 bool isNonterminal(LHS);
 bool nullable(LHS);
 set<string> getFirst(LHS);
@@ -422,3 +423,36 @@ for (map<LHS, set<string> >::iterator itFirst = firstTable.begin(); itFirst != f
 	}
 	return 0;	
 }
+void createSet() {
+	for (map<LHS, RHS>::iterator it = grammar.begin(); it != grammar.end(); it++) {
+		LHS lhs = it -> first;
+		RHS rhs = it -> second;
+
+		if(isNonterminal(lhs)) {
+			nonterminal.insert(lhs);
+		}
+		for (int i = 0; i != rhs.size(); i++) {
+			for (int j = 0; j != rhs[i].size(); j++) {
+				if (isNonterminal(rhs[i][j])) {
+					nonterminal.insert(rhs[i][j]);	
+				} else {
+					terminal.insert(rhs[i][j]);
+				}
+			}
+		}
+	}
+
+/*  print all symbol	*/
+ 	cout << "[terminal]" << endl;
+ 	for (set<string>:: iterator itSet = terminal.begin(); itSet != terminal.end(); itSet++) {
+ 				cout << *itSet + " ";	
+ 	}
+ 	cout << endl;
+ 	cout << "[nonterminal]" << endl;
+ 	for (set<string>:: iterator itSet = nonterminal.begin(); itSet != nonterminal.end(); itSet++) {
+ 			cout << *itSet + " ";	
+ 	}
+ 	cout << endl;
+
+}
+
