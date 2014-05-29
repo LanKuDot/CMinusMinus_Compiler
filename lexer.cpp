@@ -78,7 +78,19 @@ enum Category start( char *input, int now )
 		/* Got a number: goto state Number */
 		case '0' ... '9':
 			return number( input, ++now );
-			break;
+
+		/* Special symbols */
+		case '[' : case ']' :
+		case '(' : case ')' :
+		case '{' : case '}' :
+		case ';' : case ',' :
+			// If there is one more characters behind
+			// the token, this token is invaild.
+			if ( strlen( input ) != 1 )
+				return ERROR;
+			else
+				return SPECIAL_SYMBOL;
+
 		default:
 			return ERROR;
 			break;
