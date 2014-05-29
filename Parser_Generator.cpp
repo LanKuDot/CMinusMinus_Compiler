@@ -90,6 +90,14 @@ void readFile(const char * fileName) {
 		cout << "Unable to open file." << endl;
 	}
 
+	
+	rhs.clear();
+	vector<string> tmp;
+	tmp.push_back("Program");
+	tmp.push_back("$");
+	rhs.push_back(tmp);
+	grammar.insert(pair<LHS, RHS>("S", rhs));
+
 	return;
 }
 
