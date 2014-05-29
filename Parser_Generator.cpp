@@ -29,6 +29,8 @@ set<string> nonterminal;
 GRAMMAR grammar;
 map<LHS, set<string> > firstTable;
 map<LHS, set<string> > followTable;
+map<LHS, map<string, vector<string> > > LLTable;
+
 
 void readFile(const char * fileName) {
 	ifstream fin (fileName);
@@ -337,6 +339,74 @@ void eliminateNonterminal () {
 	}
 
 	return ;
+}
+
+void getLLTable() {
+	for (map<LHS, RHS>::iterator it = grammar.begin(); it != grammar.end(); it++) {
+		LHS lhs = it -> first;
+		RHS rhs = it -> second;
+		set<string>firstOfLHS = firstTable[lhs];
+
+		// all input will be terminal, so we find all productions that will create that input
+		// in the terminal set.
+		for (set<string>::iterator input = terminal.begin(); input != terminal.end(); input++) {
+			// each production
+			// cout << "check " << *input << endl;
+			for	(int i = 0; i != rhs.size(); i++) {
+				// each token in the production
+				// cout << "production : " << i << endl;
+				for (int j = 0; j != rhs[i].size(); j++) {
+					// Rule : FIRST(rhs[i][j]) contains input
+					// ex. T' -> T$  T -> aTc and input = a, FIRST(T) contains "a"
+					//	   so we can fill the table like this
+					//       | input: a | .....
+					//    ---|----------|-----------
+					//     T'| T' -> T$ | .....
+					
+					if (firstTable[rhs[i][j]].find(*input) != firstTable[rhs[i][j]].end()) {
+						LLTable[lhs].insert(pair<string, vector<string> >(*input, rhs[i]));
+						// cout << "rule 1 - find " << *input << " insert " << "rhs[" << i << "]" << endl;
+					}
+
+					// Rule : FOLLOW(lhs) contains input , and this production can derive ""epsilon
+					// then add this production.
+					
+					// if the last token of this is "also" nullable
+					// check if the FOLLOW(lhs) contains input
+					if ((j == (rhs[i].size() - 1)) && nullable(rhs[i][j])) {
+						if (followTable[lhs].find(*input) != followTable[lhs].end() ) {
+							// cout << "rule 2 - find" << *input << " insert "<< "rhs[" << i << "]" << endl;
+
+							LLTable[lhs].insert(pair<string, vector<string> >(*input, rhs[i]));
+						}
+					}
+
+					// if the token in this production isn't nullable or is terminal, we don't need to 
+					// move to next token, everything need to check is done above.
+					if(!nullable(rhs[i][j]) || !isNonterminal(rhs[i][j]))
+						break;
+				}
+			}	
+		}
+	}
+
+	
+	/* print the LLTable */
+//	for (map<LHS, map<string, vector<string> > >::iterator it = LLTable.begin(); it != LLTable.end(); it++) {
+//		LHS lhs = it -> first;
+//		map<string, vector<string> > tmp = it -> second;
+//
+//		for(map<string, vector<string> >::iterator it_tmp = tmp.begin(); it_tmp != tmp.end(); it_tmp++) {
+//			string input = it_tmp -> first;
+//			vector<string> production = it_tmp -> second;
+//			cout << setw(22) << left << lhs << setw(11) << input;
+//			for (int i = 0; i != production.size(); i++) {
+//				cout << production[i] + " ";
+//			}
+//			cout << endl;
+//		}
+//	}
+	
 }
 
 int main() {
