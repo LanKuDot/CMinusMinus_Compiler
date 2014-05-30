@@ -23,6 +23,7 @@ char category_str[CATEGORY_COUNT][16] = {
  * now   : the now-th character is the next char to analyze. */
 enum Category start( char *input, int now );
 enum Category number( char *input, int now );
+enum Category character( char *input, int now );
 
 /*
  * Open and read the source code from "source_file".
@@ -83,6 +84,10 @@ enum Category start( char *input, int now )
 		/* Got a number: goto state Number */
 		case '0' ... '9':
 			return number( input, ++now );
+
+		/* Got left ': goto state Char */
+		case '\'' :
+			return character( input, ++now );
 
 		/* Special symbols */
 		case '[' : case ']' :
@@ -153,3 +158,38 @@ enum Category number( char *input, int now )
 
 	return NUMBER;
 }	// end of number()
+
+/* Matching Char. Regex: '[.|\\n|\\t| ]' */
+enum Category character( char *input, int now )
+{
+	switch( input[now] )
+	{
+		// match characters and space
+		case 'A' ... 'Z' :
+		case 'a' ... 'z' :
+		case ' ' :
+			++now;
+			break;
+
+		// match \\n and \\t
+		case '\\' :
+			++now;
+			if ( input[now] == 'n' || input[now] == 't' )
+				++now;
+			else
+				return ERROR;
+			break;
+
+		default :
+			return ERROR;
+	}
+
+	// match right '
+	if ( input[now++] != '\'' )
+		return ERROR;
+	// If there are some characters behind the right '
+	else if ( input[now] != '\0' )
+		return ERROR;
+
+	return CHAR;
+}
