@@ -24,6 +24,7 @@ char category_str[CATEGORY_COUNT][16] = {
 enum Category start( char *input, int now );
 enum Category number( char *input, int now );
 enum Category character( char *input, int now );
+enum Category identifier( char *input, int now );
 
 /*
  * Open and read the source code from "source_file".
@@ -81,6 +82,11 @@ enum Category start( char *input, int now )
 {
 	switch ( input[now] )
 	{
+		case 'a' ... 'z' :
+		case 'A' ... 'Z' :
+		case '_' :
+			return identifier( input, ++now );
+
 		/* Got a number: goto state Number */
 		case '0' ... '9':
 			return number( input, ++now );
@@ -192,4 +198,38 @@ enum Category character( char *input, int now )
 		return ERROR;
 
 	return CHAR;
+}
+
+enum Category identifier( char *input, int now )
+{
+	/* Match Keyword */
+	if ( strcmp( input, "int" ) == 0 ||
+			strcmp( input, "char" ) == 0 ||
+			strcmp( input, "return" ) == 0 ||
+			strcmp( input, "if" ) == 0 ||
+			strcmp( input, "else" ) == 0 ||
+			strcmp( input, "while" ) == 0 ||
+			strcmp( input, "break" ) == 0 )
+		return KEYWORD;
+
+	/* Match Identifier: regex: [A-Za-z_][A-Za-z0-9_]*
+	 * The first bracket is matched at start state,
+	 * so turn to match the second bracket. */
+	while( now < strlen( input ) )
+	{
+		switch ( input[now] )
+		{
+			case 'A' ... 'Z' :
+			case 'a' ... 'z' :
+			case '0' ... '9' :
+			case '_' :
+				++now;
+				break;
+
+			default:
+				return ERROR;
+		}
+	}
+
+	return IDENTIFIER;
 }
