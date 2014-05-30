@@ -1,6 +1,8 @@
 #include <iostream>
 #include <stdio.h>
 #include <string.h>
+#include <string>
+#include <vector>
 #include "lexer.h"
 
 using namespace std;
@@ -27,16 +29,19 @@ enum Category character( char *input, int now );
 enum Category identifier( char *input, int now );
 
 /*
- * Open and read the source code from "source_file".
+ * Open and read the source code from "source_file", and
+ * store the information of tokens into "token_list".
  * Do lexial analyzing and generate a token table which
  * would be saved as a file - "token.txt".
+ * If the file doesn't exist, the funtcion will return -1.
+ * Otherwise, return 0.
  */
-int lexial_analyzer( const char *source_file )
+int lexial_analyzer( const char *source_file, vector<Token_info> *token_list )
 {
 	FILE *fp, *output_fp;
 	int line_number = 1;
 	char input_buf[128], output_buf[32], *token;
-	Category category;
+	Token_info token_info;
 
 	/* Open the file */
 	output_fp = fopen( OUTPUT_FILE_NAME, "w" );
@@ -57,15 +62,19 @@ int lexial_analyzer( const char *source_file )
 		// Analyze the category of the input token
 		while ( token != NULL )
 		{
-			category = start( token, 0 );
+			token_info.category = start( token, 0 );
 
 			// Get a comment token then ignore the remain
 			// input in that line.
-			if ( category == COMMENT )
+			if ( token_info.category == COMMENT )
 				break;
 
+			// Push the analyzing result into the token list.
+			token_info.token.assign( token );
+			(*token_list).push_back( token_info );
+
 			fprintf( output_fp, "        %-12s : %s\n", \
-					category_str[category], token );
+					category_str[token_info.category], token );
 
 			token = strtok( NULL, " \n\t\r" );
 		}

@@ -5,5 +5,7 @@ using namespace std;
 
 int main()
 {
-	lexial_analyzer( "main.c" );
+	vector<Token_info> token_list;
+
+	lexial_analyzer( "main.c", &token_list );
 }
