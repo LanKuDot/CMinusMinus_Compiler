@@ -3,3 +3,7 @@
 *.exe
 a.out
 output
+input.txt
+Set.txt
+parseTree.txt
+Table.txt
