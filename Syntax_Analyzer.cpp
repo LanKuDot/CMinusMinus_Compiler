@@ -1,36 +1,23 @@
-#include <iostream>
-#include <sstream>
-#include <fstream>
-#include <map>
-#include <vector>
-#include <string>
-#include <set>
-#include <iomanip>
-using namespace std;
-
-typedef string LHS;
-// RHS is a 2-d vector storing grammar
-typedef vector< vector<string> > RHS;
-typedef map<LHS, RHS> GRAMMAR;
-
-void readFile(const char *);
-void createSet();
-bool isNonterminal(LHS);
-bool nullable(LHS);
-set<string> getFirst(LHS);
-void getFollow();
-void eliminateNonterminal();
-void getLLTable();
+#include "lexer.h"
+#include "Syntax_Analyzer.h"
 
 set<string> terminal;
 set<string> nonterminal;
-
 GRAMMAR grammar;
+map<LHS, bool> nullTable;
 map<LHS, set<string> > firstTable;
 map<LHS, set<string> > followTable;
 map<LHS, map<string, vector<string> > > LLTable;
 
+/* All token in the input file */
+vector<Token_info> tokenList;
 
+/*
+ *  Function : readFile 
+ * Parameter : const char * fileName
+ *	    Desc : read the grammar file and parse it into
+ *             the data structure - grammar.
+ */
 void readFile(const char * fileName) {
 	ifstream fin (fileName);
 	string line;
@@ -58,15 +45,8 @@ void readFile(const char * fileName) {
 				// split line into tokens with whitespaces chars
 				while (iss) {
 					string token;
-					/*
-					cout << "check tokeN " << endl;
-					while(iss.good())
-					{
-						cout << (int)iss.get() << " ";	
-					}
-					*/
-					iss >> token;
 					
+					iss >> token;
 					if (token != "") {
 						tmp.push_back(token); 
 					}
@@ -81,7 +61,7 @@ void readFile(const char * fileName) {
 		cout << "Unable to open file." << endl;
 	}
 
-	
+	// add rule S -> Program $ in grammar
 	rhs.clear();
 	vector<string> tmp;
 	tmp.push_back("Program");
@@ -92,6 +72,11 @@ void readFile(const char * fileName) {
 	return;
 }
 
+/*
+ * function : createSet
+ * parameter : none
+ * desc : record all terminal and nonterminal in each set.
+ */
 void createSet() {
 	for (map<LHS, RHS>::iterator it = grammar.begin(); it != grammar.end(); it++) {
 		LHS lhs = it -> first;
@@ -110,29 +95,14 @@ void createSet() {
 			}
 		}
 	}
-
-/*  print all symbol	*/
- 	cout << "[terminal]" << endl;
- 	for (set<string>:: iterator itSet = terminal.begin(); itSet != terminal.end(); itSet++) {
- 				cout << *itSet + " ";	
- 	}
- 	cout << endl;
- 	cout << "[nonterminal]" << endl;
- 	for (set<string>:: iterator itSet = nonterminal.begin(); itSet != nonterminal.end(); itSet++) {
- 			cout << *itSet + " ";	
- 	}
- 	cout << endl;
-
 }
 
-bool isNonterminal(string s) {
-	/* All nonterminal would start with a upper-case character. */
-	if( isupper( s.at(0)) ) {
-		return true;
-	} else {
-		return false;
-	}
-}
+/*
+ * function : nullable
+ * parameter : LHS lhs --- a terminal or nonterminal
+ * desc : determine the lhs is nullable or not. 
+ *        this function will return bool type
+ */
 
 bool nullable(LHS lhs) {
 
@@ -173,6 +143,12 @@ bool nullable(LHS lhs) {
 	 */
 	return false;
 }
+
+/*
+ * function : getFirst
+ * parameter : LHS lhs - a terminal or nonterminal
+ * desc : return a set of FIRST(lhs)
+ */
 
 set<string> getFirst(LHS lhs) {
 	RHS rhs = grammar.find(lhs)	-> second;
@@ -217,11 +193,12 @@ set<string> getFirst(LHS lhs) {
 }
 
 
-/**************************************************************************
+/*
  * function : getFollow(LHS lhs)
  * input the lhs and it will found the Follow(lhs) and fill the result
  * into the followTable
- **************************************************************************/
+ */
+
 void getFollow(LHS lhs) {
 	//cout << "[START] getFollow : Follow(" + lhs + "): "<< endl;
 
@@ -279,14 +256,17 @@ void getFollow(LHS lhs) {
 			}
 		}
 	}
+
+	return;
 }
 
-/******************************************************
+/*
  * function eliminateNonterminal() :
  * must be done after getFollow() 
  * Eliminate all nonterminal in followTable
  * [NOTE]: This code is so ugly....who can help me....
- ******************************************************/
+ */
+
 void eliminateNonterminal () {
 	/*
 	 */
@@ -346,7 +326,13 @@ void eliminateNonterminal () {
 	return ;
 }
 
-void getLLTable() {
+/*
+ * function : createLLTable
+ * parameter : none
+ * desc : according to the rule of LL
+ *        fill in the LLTable
+ */
+void createLLTable() {
 	for (map<LHS, RHS>::iterator it = grammar.begin(); it != grammar.end(); it++) {
 		LHS lhs = it -> first;
 		RHS rhs = it -> second;
@@ -395,36 +381,216 @@ void getLLTable() {
 		}
 	}
 
-	
-	/* print the LLTable */
-//	for (map<LHS, map<string, vector<string> > >::iterator it = LLTable.begin(); it != LLTable.end(); it++) {
-//		LHS lhs = it -> first;
-//		map<string, vector<string> > tmp = it -> second;
-//
-//		for(map<string, vector<string> >::iterator it_tmp = tmp.begin(); it_tmp != tmp.end(); it_tmp++) {
-//			string input = it_tmp -> first;
-//			vector<string> production = it_tmp -> second;
-//			cout << setw(22) << left << lhs << setw(11) << input;
-//			for (int i = 0; i != production.size(); i++) {
-//				cout << production[i] + " ";
-//			}
-//			cout << endl;
-//		}
-//	}
-	
+	return;
 }
 
-int main() {
+/*
+ * this function is design for parser in Syntax_Analyzer to
+ * record property - [tranToken] in Token_info. 
+ * 
+ * property : tranToken is a token in grammar.
+ * ex. int x;
+ * in main.c it is [int x;] undoubtedly, but in grammar.txt 
+ * parser will hope the tokens above are [int id;] , it will 
+ * be easily to match each token and quickly show their original 
+ * meaning.
+ */
+void tokenTrans( vector<Token_info> & token_list ) {
+	
+	for (int i = 0; i != tokenList.size(); i++) {
+		switch (tokenList[i].category) {
+			case IDENTIFIER :
+				tokenList[i].tranToken = "id";
+				break;
+			case NUMBER :
+				tokenList[i].tranToken = "num";
+				break;
+			default : 
+				tokenList[i].tranToken = tokenList[i].token;
+				break;
+		}
+	}
 
+	return;
+}
+
+/*
+ * function : parser
+ * parameter : vector<string> input
+ *             an input vector which have been parsed py lexer
+ * desc : 
+ */
+void parser(vector<Token_info> & tokenList, const char * fileName) {
+	// trans tokens in tokenList
+	tokenTrans(tokenList);
+
+	ofstream outFile;
+	outFile.open(fileName);
+	ostream & output(outFile.is_open() ? outFile : cout);
+
+	cout << "[Start] : parser" << endl;
+
+	stack<string> pStack;  // production stack
+	stack<Token_info> iStack;  // input stack
+	stack<int> oStack; // number of parse order
+	int i = tokenList.size();
+	int order = 0;
+
+	Token_info endSym;
+	endSym.token = "$";
+	endSym.tranToken = "$";
+
+	if (iStack.empty()) { iStack.push(endSym); }
+	else {
+		cout << "[Error] : ParseTree input stack isn't empty." << endl;
+		return;
+	}
+	
+	if (pStack.empty()) { pStack.push("S"); }
+	else {
+		cout << "[Error] : ParseTree production stack isn't empty." << endl;
+		return;
+	}
+
+	// push all token of input file into iStack
+	while ((--i) != -1) {
+		iStack.push(tokenList[i]);
+	}
+	cout << "string push in iStack" << endl;
+
+	if (oStack.empty()) { oStack.push(order); }
+	while (!pStack.empty()) {
+			
+		// Debug : trace stack //
+
+		/*
+		stack<string> dStack;
+		string debug = "";
+
+		cout << "pStack : ";
+		// debugging : for pStack
+		while (!pStack.empty()) {
+			cout << pStack.top() << " ";
+			dStack.push(pStack.top());	
+			pStack.pop();
+		}
+		cout << endl;
+		while (!dStack.empty()) {
+			pStack.push(dStack.top());	
+			dStack.pop();	
+		}
+
+		// debugging : for iStack
+		cout << "iStack : ";
+		while (!iStack.empty()) {
+			cout << iStack.top() << " ";
+			dStack.push(iStack.top());	
+			iStack.pop();
+		}
+		cout << endl;
+		while (!dStack.empty()) {
+			iStack.push(dStack.top());	
+			dStack.pop();	
+		}*/
+
+		// if the top of the production stack is 
+		// epsilon, then pop unconditionally.
+		if (pStack.top() == "epsilon") {
+			pStack.pop();	
+			oStack.pop();
+		}
+		// if top of pStack is terminal then match it and pop
+		// both in pStack and iStack
+		if (!isNonterminal(pStack.top())) {
+			if (pStack.top() == iStack.top().tranToken) {
+				// print
+				//cout << "[top] : " <<  setw(14) << left << iStack.top();
+				for (int j = oStack.top(); j >= 1; j--) {
+					output << "  ";
+				}
+				output << oStack.top() << " " << iStack.top().token << endl;
+
+				pStack.pop();
+				oStack.pop();	
+				iStack.pop();
+			} 
+			// terminal not match : this may be the error from 
+			// first() and follow()
+			else {
+				cout << "[Error] : terminal do not match for '" 
+					 << pStack.top() << "' and '" 
+					 << iStack.top().token << "'" << endl;
+			}
+		} 
+		// if parser cannot find rule for the input(terminal) of nonterminal
+		// print error.
+		else if (LLTable[pStack.top()][iStack.top().tranToken].size() == 0){
+			cout << "[Error] : no such rule for " 
+				 <<"nonterminal : " << pStack.top() 
+				 << " input : " << iStack.top().token << endl;
+		} 
+		// match the rule and replace the top element of pStack with
+		// the production of the rule
+		else {
+			vector<string> rhs = LLTable[pStack.top()][iStack.top().tranToken];
+
+			order = oStack.top() + 1;
+
+			// print
+			//cout << "[top] : " <<  setw(14) << left << iStack.top().token;
+			for (int j = oStack.top(); j >= 1; j--) {
+				output << "  ";
+			}
+			output << oStack.top() << " " << pStack.top() << endl;
+			
+			// pop the top
+			pStack.pop();
+			oStack.pop();
+			// push the production
+			for (int i = rhs.size() - 1; i != -1; i--) {
+				pStack.push(rhs[i]);		
+				oStack.push(order);		
+			}
+		}
+	}
+
+	return;	
+} 
+
+/*
+ * function : isNonterminal
+ * desc : determine the token is nonterminal or not
+ */
+
+bool isNonterminal(string s) {
+	/* All nonterminal would start with a upper-case character. */
+	if( isupper( s.at(0)) ) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+
+/*  print all symbol	*/
+void printTermNonterminal() {
+ 	cout << "[terminal]" << endl;
+ 	for (set<string>:: iterator itSet = terminal.begin(); itSet != terminal.end(); itSet++) {
+ 				cout << *itSet + " ";	
+ 	}
+ 	cout << endl;
+ 	cout << "[nonterminal]" << endl;
+ 	for (set<string>:: iterator itSet = nonterminal.begin(); itSet != nonterminal.end(); itSet++) {
+ 			cout << *itSet + " ";	
+ 	}
+ 	cout << endl;
+	return;
+}
+
+/* print grammar */
+void printGrammar () {
 	GRAMMAR::iterator it;
-	const char * fileName = "grammar.txt";
-
-	readFile(fileName);
-	// create terminal and nonterminal set
-	createSet();
-
-	/*	
-	for (map<LHS, RHS>::iterator it = grammar.begin(); it != grammar.end(); it++) {
+	for (it = grammar.begin(); it != grammar.end(); it++) {
 		LHS lhs = it -> first;
 		RHS rhs = it -> second;
 		cout << "LHS : " << lhs << endl;
@@ -434,23 +600,136 @@ int main() {
 			}
 			cout << endl;
 		}
-	}*/
+	}
+	return;
+}
 
-	/* check nullable works */
-	
-	/*
+/* print nullTable */
+void printNullable (ostream & output) {
+	GRAMMAR::iterator it;
+	string result;
+
+	output << "Nullable" << endl;
 	for (it = grammar.begin(); it != grammar.end(); it++) {
 		LHS lhs = it -> first;
-		if(lhs == "FunDecl")
+		if (nullTable[lhs] == true) 
+			result = "true";
+		else
+			result = "false";
+
+		output << setw(24) << left << lhs
+	   	       << ":  " <<  result << endl;
+	} 
+	return ;
+}
+
+/* print FirstTable */
+void printFirst (ostream & output) {
+	/* show elements in the firstTable */
+
+	// [NOTE] only print nonterminal elements
+	// but remind that the firstTable will alse record First(terminal)
+	output << "First" << endl;
+	for (map<LHS, set<string> >::iterator itFirst = firstTable.begin(); itFirst != firstTable.end(); itFirst++) {
+		LHS lhs = itFirst -> first;
+		if (isNonterminal(lhs)) {
+			output << setw(24) << left << lhs;
+		
+			for (set<string>::iterator itSet = firstTable[lhs].begin(); itSet != firstTable[lhs].end(); itSet++) {
+				output << ":  " << *itSet + " ";	
+			}
+			output << endl;
+		}
+	}
+	return;
+}
+
+/* print followTable */
+void printFollow (ostream & output) {
+
+	output << "Follow" << endl;
+	for (map<LHS, set<string> >:: iterator itFirst = followTable.begin(); itFirst != followTable.end(); itFirst++) {
+		LHS lhs = itFirst -> first;
+		if (isNonterminal(lhs)) {
+			output << setw(24) << left << lhs;
+		
+			for (set<string>:: iterator itSet = followTable[lhs].begin(); itSet != followTable[lhs].end(); itSet++) {
+				output << ":  " << *itSet + " ";	
+			}
+			output << endl;
+		}
+	}
+
+	return;
+}
+
+/* print nullable first follow */
+void printSet (const char * fileName) {
+	ofstream outFile;	
+	outFile.open(fileName);
+
+	if (!outFile) {
+		cout << "[Error] : Fail to open file " << fileName  << " -> output to console." << endl;
+	} 
+
+	ostream & output(outFile.is_open() ? outFile : cout);
+
+	printNullable(output);
+	output << endl;
+	output << endl;
+
+	printFirst(output);
+	output << endl;
+	output << endl;
+
+	printFollow(output);
+	output << endl;
+	output << endl;
+
+	return;
+}
+
+/* print LLTable */
+void printLLTable (const char * fileName) {
+	ofstream outFile;
+	outFile.open(fileName);
+	ostream & output(outFile.is_open() ? outFile : cout);
+
+	/* print the LLTable */
+	for (map<LHS, map<string, vector<string> > >::iterator it = LLTable.begin(); it != LLTable.end(); it++) {
+		LHS lhs = it -> first;
+		map<string, vector<string> > tmp = it -> second;
+
+		for(map<string, vector<string> >::iterator it_tmp = tmp.begin(); it_tmp != tmp.end(); it_tmp++) {
+			string input = it_tmp -> first;
+			vector<string> production = it_tmp -> second;
+			output << setw(22) << left << lhs << setw(11) << input;
+			for (int i = 0; i != production.size(); i++) {
+				output << production[i] + " ";
+			}
+			output << endl;
+		}
+	}
+	return;
+}
+
+void createNullTable() {
+	GRAMMAR::iterator it;
+	// create nullTable
+	for (it = grammar.begin(); it != grammar.end(); it++) {
+		LHS lhs = it -> first;
 		if(nullable(lhs)) {
-			cout << lhs << " is nullable." << endl;
+			nullTable[lhs] = true;
 		}
 		else {
-			cout << lhs << " isn't nullable" << endl;	
+			nullTable[lhs] = false;
 		}
 	} 
-	*/
+	return;
+}
 
+void createFirstTable() {
+	GRAMMAR::iterator it;
 	// create first table
 	for (map<LHS, RHS>::iterator it = grammar.begin(); it != grammar.end(); it++) {
 		LHS lhs = it -> first;
@@ -463,44 +742,17 @@ int main() {
 			}
 		}
 	}
+	return;
+}
 
-
-	/* show all elements in the firstTable */
-	cout << "[First]" << endl;
-	cout << "=============================" << endl;
-	for (map<LHS, set<string> >::iterator itFirst = firstTable.begin(); itFirst != firstTable.end(); itFirst++) {
-		LHS lhs = itFirst -> first;
-	//	if (isNonterminal(lhs)) {
-			cout << lhs + ": ";
-		
-			for (set<string>::iterator itSet = firstTable[lhs].begin(); itSet != firstTable[lhs].end(); itSet++) {
-				cout << *itSet + " ";	
-			}
-			cout << endl;
-	//	}
-	}
-
-	
+void createFollowTable() {
+	GRAMMAR::iterator it;
+	// create follow table
 	for (it = grammar.begin(); it != grammar.end(); it++) {
 		LHS lhs = it -> first;
 		getFollow(lhs);
 	}
 	eliminateNonterminal();
-
-	cout << "[Follow]" << endl;
-	cout << "=============================" << endl;
-	for (map<LHS, set<string> >:: iterator itFirst = followTable.begin(); itFirst != followTable.end(); itFirst++) {
-		LHS lhs = itFirst -> first;
-		if (isNonterminal(lhs)) {
-			cout << lhs + ": ";
-		
-			for (set<string>:: iterator itSet = followTable[lhs].begin(); itSet != followTable[lhs].end(); itSet++) {
-				cout << *itSet + " ";	
-			}
-			cout << endl;
-		}
-	}
-
-	getLLTable();
-	return 0;	
+	return;
 }
+
