@@ -6,7 +6,8 @@
 
 #define OUTPUT_FILE_NAME	"token.txt"
 
-using namespace std; 
+using namespace std;
+
 /* The enumeration of the category of tokens */
 enum Category {
 	KEYWORD = 0,
