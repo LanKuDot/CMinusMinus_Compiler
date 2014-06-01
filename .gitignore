@@ -3,7 +3,6 @@
 *.exe
 a.out
 output
-input.txt
 Set.txt
-parseTree.txt
+Parse_Tree.txt
 Table.txt
