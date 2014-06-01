@@ -1,5 +1,12 @@
 Program
-    VarDeclList FunDeclList
+    DeclHead
+DeclHead
+    Type id DeclTail
+    epsilon
+DeclTail
+    ; DeclHead
+    [ num ] ; DeclHead
+    ( ParamDeclList ) Block DeclHead
 VarDeclList
     VarDecl VarDeclList
     epsilon
@@ -14,7 +21,7 @@ FunDeclList'
     FunDeclList
     epsilon
 FunDecl
-    Type id ( ParamDeclList ) Block
+    Type id ( ParamDeclList ) Block 
 ParamDeclList
     ParamDeclListTail
     epsilon
@@ -49,7 +56,6 @@ Stmt
 Expr
     Primary Expr''
     UnaryOp Expr Expr''
-    id Expr' Expr''
 Expr'
     = Expr
     [ Expr ] = Expr
@@ -61,6 +67,9 @@ Primary
     num
     ( Expr )
 Primary'
+    Primary''
+    Expr' Expr''
+Primary''
     ( ExprList )
     [ Expr ]
     epsilon
