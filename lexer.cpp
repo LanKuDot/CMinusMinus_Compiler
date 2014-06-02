@@ -71,6 +71,7 @@ int lexial_analyzer( const char *source_file, vector<Token_info> *token_list )
 
 			// Push the analyzing result into the token list.
 			token_info.token.assign( token );
+			token_info.lineNumber = line_number;
 			(*token_list).push_back( token_info );
 
 			fprintf( output_fp, "        %-12s : %s\n", \
