@@ -633,10 +633,10 @@ void printFirst (ostream & output) {
 	for (map<LHS, set<string> >::iterator itFirst = firstTable.begin(); itFirst != firstTable.end(); itFirst++) {
 		LHS lhs = itFirst -> first;
 		if (isNonterminal(lhs)) {
-			output << setw(24) << left << lhs;
+			output << setw(24) << left << lhs << ":  ";
 		
 			for (set<string>::iterator itSet = firstTable[lhs].begin(); itSet != firstTable[lhs].end(); itSet++) {
-				output << ":  " << *itSet + " ";	
+				output << *itSet + " ";	
 			}
 			output << endl;
 		}
@@ -651,10 +651,10 @@ void printFollow (ostream & output) {
 	for (map<LHS, set<string> >:: iterator itFirst = followTable.begin(); itFirst != followTable.end(); itFirst++) {
 		LHS lhs = itFirst -> first;
 		if (isNonterminal(lhs)) {
-			output << setw(24) << left << lhs;
+			output << setw(24) << left << lhs << ":  ";
 		
 			for (set<string>:: iterator itSet = followTable[lhs].begin(); itSet != followTable[lhs].end(); itSet++) {
-				output << ":  " << *itSet + " ";	
+				output << *itSet + " ";	
 			}
 			output << endl;
 		}
