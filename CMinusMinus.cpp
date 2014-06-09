@@ -1,6 +1,7 @@
 #include <iostream>
 #include "lexer.h"
 #include "Syntax_Analyzer.h"
+#include "Semantic_Analyzer.h"
 
 /* The marcos of related files */
 #define SOURCE_CODE_FILE	"main.c"
