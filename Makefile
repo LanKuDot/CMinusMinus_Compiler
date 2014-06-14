@@ -1,14 +1,19 @@
+COMPILER = g++
+CFLAG = -g
+
 OUTPUT_EXE = CMinusMinus
+
 TOKEN_LIST_FILE = token.txt
 SET_FILE = Set.txt
 TABLE_FILE = Table.txt
 PARSE_TREE_FILE = Parse_Tree.txt
 
-All: CMinusMinus.cpp lexer.cpp Syntax_Analyzer.cpp
-	g++ -g -o $(OUTPUT_EXE) \
-		CMinusMinus.cpp \
-		lexer.cpp \
-		Syntax_Analyzer.cpp
+SRCS = CMinusMinus.cpp \
+	   lexer.cpp \
+	   Syntax_Analyzer.cpp
+
+All: $(SRCS)
+	$(COMPILER) $(CFLAG) -o $(OUTPUT_EXE) $(SRCS)
 
 run: All
 	./$(OUTPUT_EXE)
