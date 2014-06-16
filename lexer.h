@@ -9,6 +9,8 @@
 using namespace std;
 
 /* The enumeration of the category of tokens */
+// if there are some new data type going to be add here,
+// you should also add in function getType() in Semantic_Analyzer.cpp
 enum Category {
 	KEYWORD = 0,
 	OPERATOR,
