@@ -7,10 +7,12 @@ TOKEN_LIST_FILE = token.txt
 SET_FILE = Set.txt
 TABLE_FILE = Table.txt
 PARSE_TREE_FILE = Parse_Tree.txt
+SYMBOL_TABLE_FILE = Symbol_Table.txt
 
 SRCS = CMinusMinus.cpp \
 	   lexer.cpp \
 	   Syntax_Analyzer.cpp \
+	   Semantic_Analyzer.cpp \
 	   MachineCodeGenerator.cpp
 
 All: $(SRCS)
@@ -23,4 +25,4 @@ dbg:
 	gdb $(OUTPUT_EXE)
 
 clean:
-	rm $(OUTPUT_EXE) $(TOKEN_LIST_FILE) $(SET_FILE) $(TABLE_FILE) $(PARSE_TREE_FILE)
+	rm $(OUTPUT_EXE) $(TOKEN_LIST_FILE) $(SET_FILE) $(TABLE_FILE) $(PARSE_TREE_FILE) $(SYMBOL_TABLE_FILE)
