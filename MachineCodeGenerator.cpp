@@ -13,6 +13,7 @@ typedef struct parseTree_element {
 
 void createQuadruple();
 int readinElement( FILE *fp, parseTree_Ele *node );
+int getFuncDeclStackLevel( FILE *fp, const char *funcName );
 
 void machineCodeGenerator()
 {
@@ -23,9 +24,12 @@ void machineCodeGenerator()
 
 void createQuadruple()
 {
-	/* Read in parse tree */
 	FILE *fp = fopen( PARSE_TREE_FILE, "r" );
 	parseTree_Ele node;
+	int mainFuncScopeStackLv;
+
+	/* Get the stack level of the scope of the main function */
+	mainFuncScopeStackLv = getFuncDeclStackLevel( fp, "main" );
 
 	/* Only expression( Expr ) needs to generate quadruple. */
 	while ( readinElement( fp, &node ) != -1 )
@@ -72,3 +76,48 @@ int readinElement( FILE *fp, parseTree_Ele *node )
 	}
 
 }	// end of readinElement()
+
+/* Get the stack level of begin of scope of the function.
+ * According to the modified grammar, the stack level of
+ * begin of the function scope is that of funcion id plus 2.
+ * Here is the garmmar (the stack level):
+ * DeclHead -> Type id DeclTail (x)
+ * DeclTail (x) -> ( ParamDeclList ) Block DeclHead (x+1)
+ * Block (x+1) -> { ... } (x+2) - The scope of func id starts at here.
+ *
+ * - *fp: [in] The file pointer to the parse tree file
+ *
+ * Return the stack level of the begin of the scope of the
+ * function. or return -1, if not found.
+ */
+int getFuncDeclStackLevel( FILE *fp, const char *funcName )
+{
+	parseTree_Ele node;
+	int declStackLevel;
+
+	/* Get the stack level of the id of the function */
+	while ( readinElement( fp, &node ) != -1 )
+	{
+		if ( strcmp( node.name, funcName ) == 0 )
+		{
+			declStackLevel = node.stackLevel;
+			break;
+		}
+	}
+
+	/* Get the stack level of next symbol "{". */
+	while ( readinElement( fp, &node ) != -1 )
+	{
+		if ( strcmp( node.name, "{" ) == 0 )
+		{
+			if ( node.stackLevel - declStackLevel == 2 )
+			{
+				return node.stackLevel;
+			}
+			else break;
+		}
+	}
+
+	return -1;
+
+}	// end of getFuncDeclStackLevel()
