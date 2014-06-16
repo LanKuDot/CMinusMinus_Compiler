@@ -2,6 +2,8 @@
 #include "lexer.h"
 #include "Syntax_Analyzer.h"
 #include "Semantic_Analyzer.h"
+#include "MachineCodeGenerator.h"
+#include "config.h"
 
 /* The marcos of related files */
 #define SOURCE_CODE_FILE	"main.c"
@@ -9,9 +11,7 @@
 #define PARSE_TREE_FILE		"Parse_Tree.txt"
 #define SET_FILE			"Set.txt"
 #define LLTABLE_FILE		"Table.txt"
-#define SYMBOL_TABLE_FILE		"Symbol_Table.txt"
-=======
-#include "config.h"
+#define SYMBOL_TABLE_FILE	"Symbol_Table.txt"
 
 using namespace std;
 
@@ -37,6 +37,8 @@ int main()
 
 	createSymbolTable();
 	printTA_Symbol_Table(SYMBOL_TABLE_FILE);
+
+	machineCodeGenerator();
 
 	return 0;	
 }

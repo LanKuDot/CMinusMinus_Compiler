@@ -10,22 +10,16 @@ PARSE_TREE_FILE = Parse_Tree.txt
 
 SRCS = CMinusMinus.cpp \
 	   lexer.cpp \
-	   Syntax_Analyzer.cpp
-
-All: CMinusMinus.cpp lexer.cpp Syntax_Analyzer.cpp Semantic_Analyzer.cpp
-	g++ -g -o $(OUTPUT_EXE) \
-		CMinusMinus.cpp \
-		lexer.cpp \
-		Syntax_Analyzer.cpp \
-		Semantic_Analyzer.cpp
+	   Syntax_Analyzer.cpp \
+	   MachineCodeGenerator.cpp
 
 All: $(SRCS)
 	$(COMPILER) $(CFLAG) -o $(OUTPUT_EXE) $(SRCS)
 
-run: All
+run:
 	./$(OUTPUT_EXE)
 
-dbg: All
+dbg:
 	gdb $(OUTPUT_EXE)
 
 clean:
