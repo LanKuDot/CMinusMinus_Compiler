@@ -520,6 +520,7 @@ void parser(vector<Token_info> & tokenList, const char * fileName) {
 				cout << "[Error] : terminal do not match for '" 
 					 << pStack.top() << "' and '" 
 					 << iStack.top().token << "'" << endl;
+				break;
 			}
 		} 
 		// if parser cannot find rule for the input(terminal) of nonterminal
@@ -528,6 +529,7 @@ void parser(vector<Token_info> & tokenList, const char * fileName) {
 			cout << "[Error] : no such rule for " 
 				 <<"nonterminal : " << pStack.top() 
 				 << " input : " << iStack.top().token << endl;
+			break;
 		} 
 		// match the rule and replace the top element of pStack with
 		// the production of the rule
