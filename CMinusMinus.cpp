@@ -9,6 +9,7 @@
 #define PARSE_TREE_FILE		"Parse_Tree.txt"
 #define SET_FILE			"Set.txt"
 #define LLTABLE_FILE		"Table.txt"
+#define SYMBOL_TABLE_FILE		"Symbol_Table.txt"
 
 using namespace std;
 
@@ -31,6 +32,9 @@ int main()
 	printTermNonterminal();
 	printSet(SET_FILE);
 	printLLTable(LLTABLE_FILE);
+
+	createSymbolTable();
+	printTA_Symbol_Table(SYMBOL_TABLE_FILE);
 
 	return 0;	
 }
