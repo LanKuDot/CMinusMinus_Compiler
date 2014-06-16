@@ -27,6 +27,7 @@ enum Category {
 typedef struct {
 	string token;
 	string tranToken;
+	int lineNumber;
 	enum Category category;
 } Token_info;
 

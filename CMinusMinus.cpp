@@ -10,6 +10,8 @@
 #define SET_FILE			"Set.txt"
 #define LLTABLE_FILE		"Table.txt"
 #define SYMBOL_TABLE_FILE		"Symbol_Table.txt"
+=======
+#include "config.h"
 
 using namespace std;
 
