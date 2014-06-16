@@ -15,6 +15,8 @@ void createQuadruple();
 int readinElement( FILE *fp, parseTree_Ele *node );
 int getFuncDeclStackLevel( FILE *fp, const char *funcName );
 
+int mainFuncScopeStackLv;
+
 void machineCodeGenerator()
 {
 	/* Generate quadruples */
@@ -26,7 +28,6 @@ void createQuadruple()
 {
 	FILE *fp = fopen( PARSE_TREE_FILE, "r" );
 	parseTree_Ele node;
-	int mainFuncScopeStackLv;
 
 	/* Get the stack level of the scope of the main function */
 	mainFuncScopeStackLv = getFuncDeclStackLevel( fp, "main" );
