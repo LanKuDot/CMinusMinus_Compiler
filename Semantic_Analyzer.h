@@ -1,3 +1,6 @@
+#ifndef SEMANTIC_ANZR
+#define SEMANTIC_ANZR
+
 #include <iostream>
 #include <iomanip>
 #include <fstream>
@@ -17,3 +20,5 @@ void insert(int, string, int, bool, bool);
 void createSymbolTable();
 void printTA_Symbol_Table(const char *);
 void forTAOutput();
+
+#endif /* SEMANTIC_ANZR */
