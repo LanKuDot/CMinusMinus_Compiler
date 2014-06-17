@@ -13,7 +13,8 @@ SRCS = CMinusMinus.cpp \
 	   lexer.cpp \
 	   Syntax_Analyzer.cpp \
 	   Semantic_Analyzer.cpp \
-	   MachineCodeGenerator.cpp
+	   MachineCodeGenerator.cpp \
+	   simple_itoa.cpp
 
 All: $(SRCS)
 	$(COMPILER) $(CFLAG) -o $(OUTPUT_EXE) $(SRCS)
