@@ -13,7 +13,7 @@ using namespace std;
 int Scope_Range = 0;
 int R_Scope_Range = 0;
 
-vector<Symbol_Detail> Symbol_Table_Element;
+//vector<Symbol_Detail> Symbol_Table_Element;
 
 // Symbol_Table : 
 // A 2-d vector.
