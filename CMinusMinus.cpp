@@ -35,8 +35,7 @@ int main()
 	printSet(SET_FILE);
 	printLLTable(LLTABLE_FILE);
 
-	createSymbolTable();
-	printTA_Symbol_Table(SYMBOL_TABLE_FILE);
+	createSymbolTable(SYMBOL_TABLE_FILE);
 
 	machineCodeGenerator();
 
