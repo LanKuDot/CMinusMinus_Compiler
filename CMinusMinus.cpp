@@ -1,4 +1,5 @@
 #include <iostream>
+#include <vector>
 #include "lexer.h"
 #include "Syntax_Analyzer.h"
 #include "Semantic_Analyzer.h"
@@ -14,6 +15,8 @@
 #define SYMBOL_TABLE_FILE	"Symbol_Table.txt"
 
 using namespace std;
+
+vector<Symbol_Detail> Symbol_Table_Element;
 
 int main()
 {
