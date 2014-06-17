@@ -17,8 +17,6 @@ bool isInitialized(int);
 string lookUp (int, int, bool, bool);
 void insert(int, string, int, bool, bool);
 
-void createSymbolTable();
-void printTA_Symbol_Table(const char *);
-void forTAOutput();
+void createSymbolTable(const char * fileName);
 
 #endif /* SEMANTIC_ANZR */

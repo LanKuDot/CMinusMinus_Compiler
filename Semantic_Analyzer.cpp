@@ -11,6 +11,7 @@ using namespace std;
 // record the current scope, it will increment or decrement after enter
 // another scope or leave the scope.
 int Scope_Range = 0;
+int R_Scope_Range = 0;
 
 // the Symbol_Detail records the detail of the symbol and will be
 // stored into Symbol_Table.
@@ -30,7 +31,7 @@ vector< vector<Symbol_Detail> > TA_Symbol_Table;
 
 // this is a simplified symbol table...just for the
 // foolish output !!!
-vector< vector<Symbol_Detail> > Symbol_Table;
+stack< vector<Symbol_Detail> > Symbol_Table;
 
 // isDeclared(bool) : check the input symbol is declared or not.
 // parameter : 
@@ -82,13 +83,13 @@ string lookUp (int pos, int scope, bool isDeclared, bool isInitialized) {
 	
 	//cout << debugToken << endl;
 	if (isDeclared) {
-		// cout << "declared" << endl;
+		//cout << "declared" << endl;
 		// because the symbol is initialized the type of 
 		// this symbol must be the last symbol;
+		vector<Symbol_Detail> top = Symbol_Table.top();
 		type = tokenList[pos - 1].token;
-		for (int i = 0; i != Symbol_Table[scope].size(); i++) {
-			if (Symbol_Table[scope][i].declared && 
-					Symbol_Table[scope][i].symbol == tokenList[pos].token) {
+		for (int i = 0; i != top.size(); i++) {
+			if (top[i].declared && top[i].symbol == tokenList[pos].token) {
 				cout << debugToken << " duplicate declared.";
 				return "ERROR";
 			}
@@ -98,16 +99,33 @@ string lookUp (int pos, int scope, bool isDeclared, bool isInitialized) {
 
 	// cout << "undeclared" << endl;
 	// not declared
-	for (int i = scope; i >= 0; i--) {
-		for (int j = 0; j != Symbol_Table[i].size(); j++) {
-			if (Symbol_Table[i][j].symbol == tokenList[pos].token) {
-				return Symbol_Table[i][j].type;
+	vector< vector<Symbol_Detail> > tmp;
+	while (!Symbol_Table.empty()) {
+		vector<Symbol_Detail> top = Symbol_Table.top();
+		Symbol_Table.pop();
+		tmp.push_back(top);
+		type = tokenList[pos - 1].token;
+
+		for (int i = 0; i != top.size(); i++) {
+			if (top[i].declared && top[i].symbol == tokenList[pos].token) {
+				if (tmp.size() > 0) {
+					for (int j = tmp.size() - 1; j > -1; j--) {
+						Symbol_Table.push(tmp[j]);
+					}
+				}
+				return top[i].type;
 			}
 		}
 	}
+	
+	if (tmp.size() > 0){ 
+		for (int k = tmp.size() - 1; k > -1; k--) {
+			Symbol_Table.push(tmp[k]);
+		}
+	}
+	
 	cout << debugToken << "not declared." << endl;
 	return "ERROR";
-
 
 }
 
@@ -121,24 +139,33 @@ string lookUp (int pos, int scope, bool isDeclared, bool isInitialized) {
 
 void insert(int pos, string type, int scope, bool isDeclared, bool isInitialized) {
 	//cout << "[insert]" << endl;
+	if (isDeclared) {
+		vector<Symbol_Detail> top = Symbol_Table.top();
+		Symbol_Table.pop();
+		Symbol_Detail symDetail;
+		symDetail.symbol = tokenList[pos].token;
+		symDetail.token = tokenList[pos].tranToken;
+		symDetail.scope = scope;
+		symDetail.type = type;
+		symDetail.initialized = isInitialized;
+		symDetail.declared = isDeclared;
 
-	Symbol_Detail symDetail;
-	symDetail.symbol = tokenList[pos].token;
-	symDetail.token = tokenList[pos].tranToken;
-	symDetail.scope = scope;
-	symDetail.type = type;
-	symDetail.initialized = isInitialized;
-	symDetail.declared = isDeclared;
-
-	//cout << "[scope] : " << scope << endl;
-	Symbol_Table[scope].push_back(symDetail);
-	//cout << "[insert] : done" << endl;
-
+		top.push_back(symDetail); 
+		Symbol_Table.push(top);	
+	}
 	return;
 }
 
 
-void createSymbolTable() {
+void createSymbolTable(const char * fileName) {
+	ofstream outFile;	
+	outFile.open(fileName);
+
+	if (!outFile) {
+		cout << "[Error] : Fail to open file " << fileName  << " -> output to console." << endl;
+	} 
+
+	ostream & output(outFile.is_open() ? outFile : cout);
 	cout << "[START] create Symbol_Table" << endl;
 
 	// * check every symbol in main.c .
@@ -153,14 +180,33 @@ void createSymbolTable() {
 	// create a vector of the current scope and it will be pushed
 	// into the symbol after entering another scope.
 	vector<Symbol_Detail> tmp;
-	Symbol_Table.push_back(tmp);
+	Symbol_Table.push(tmp);
+
+	output << setw(10) << left << "symbol";
+	output << setw(10) << left << "token";
+	output << setw(10) << left << "scope";
+	output << setw(10) << left << "type";
+	output << endl;
 
 	for (int i = 0; i != tokenList.size(); i++) {
 		string symbol = tokenList[i].token;
 		if (tokenList[i].tranToken == "id") {
-			string type = lookUp(i, Scope_Range, isDeclared(i), isInitialized(i));
+			int scope;
+			if (R_Scope_Range == 0) {
+				scope = 0;
+			} else {
+				scope = Scope_Range;
+			}
+			string type = lookUp(i, scope, isDeclared(i), isInitialized(i));
 			if (type != "ERROR"){
-				insert(i, type, Scope_Range, isDeclared(i), isInitialized(i));
+				insert(i, type, scope, isDeclared(i), isInitialized(i));
+				if (isDeclared(i)) {
+					output << setw(10) << left << tokenList[i].token;
+					output << setw(10) << left << tokenList[i].tranToken;
+					output << setw(10) << left << scope;
+					output << setw(10) << left << type;
+					output << endl;
+				}
 			} else {
 				cout << "error: in " << tokenList[i].token << endl;
 				return ;
@@ -168,80 +214,17 @@ void createSymbolTable() {
 		}
 		else if (tokenList[i].token == "(") {
 			vector<Symbol_Detail> tmp;
-			Symbol_Table.push_back(tmp);
+			Symbol_Table.push(tmp);
 			Scope_Range++;
+			R_Scope_Range++;
 		}
 		else if (tokenList[i].token == "}") {
-			Scope_Range--;
+			R_Scope_Range--;
+			Symbol_Table.pop();
 		}
 	}
-}
-
-void printTA_Symbol_Table(const char * fileName) {
-	ofstream outFile;	
-	outFile.open(fileName);
-
-	if (!outFile) {
-		cout << "[Error] : Fail to open file " << fileName  << " -> output to console." << endl;
-	} 
-
-	ostream & output(outFile.is_open() ? outFile : cout);
-
-	forTAOutput();
-	output << setw(10) << left << "symbol";
-	output << setw(10) << left << "token";
-	output << setw(10) << left << "scope";
-	output << setw(10) << left << "type";
-	output << endl;
-	for (int i = 0; i != TA_Symbol_Table.size(); i++) {
-		for (int j = 0; j != TA_Symbol_Table[i].size(); j++) {
-			output << setw(10) << left << TA_Symbol_Table[i][j].symbol;
-			output << setw(10) << left << TA_Symbol_Table[i][j].token;
-			output << setw(10) << left << TA_Symbol_Table[i][j].scope;
-			output << setw(10) << left << TA_Symbol_Table[i][j].type;
-			output << endl;
-		}	
+	if (!Symbol_Table.empty()) {
+		vector<Symbol_Detail> tmp = Symbol_Table.top();
+		Symbol_Table.pop();
 	}
 }
-
-
-/*
-void forTAOutputCheck(Symbol_Detail iSymbol) {
-	for (int i = TA_Symbol_Table.size(); i >= 0; i--) {
-		for (int j = 0; j != TA_Symbol_Table[i].size(); j++) {
-			if(TA_Symbol_Table[i][j].symbol == iSymbol.sybmol) {
-				Symbol_Detail symDetail;
-				symDetail.symbol = tokenList[pos].token;
-				symDetail.token = tokenList[pos].tranToken;
-				symDetail.scope = scope;
-				symDetail.type = type;
-
-				TA_Symbol_Table[i].push_back(symDetail);
-			}
-		}
-	}
-}*/
-
-void forTAOutput() {
-	vector<Symbol_Detail> forTA;
-	TA_Symbol_Table.push_back(forTA);
-	for (int i = 0; i != Symbol_Table.size(); i++) {
-		vector<Symbol_Detail> forTA;
-		for (int j = 0; j != Symbol_Table[i].size(); j++) {
-			if (Symbol_Table[i][j].declared == true) {
-				Symbol_Detail symDetail;
-				symDetail.symbol = Symbol_Table[i][j].symbol;
-				symDetail.token = Symbol_Table[i][j].token;
-				symDetail.scope = Symbol_Table[i][j].scope;
-				symDetail.type = Symbol_Table[i][j].type;
-
-				TA_Symbol_Table[i].push_back(symDetail);
-			}
-			/*else {
-				forTAOutputCheck(Symbol_Table[i][j]);
-			}*/
-		}
-		TA_Symbol_Table.push_back(forTA);
-	}
-}
-
