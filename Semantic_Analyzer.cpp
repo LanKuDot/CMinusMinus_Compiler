@@ -13,6 +13,8 @@ using namespace std;
 int Scope_Range = 0;
 int R_Scope_Range = 0;
 
+vector<Symbol_Detail> Symbol_Table_Element;
+
 // Symbol_Table : 
 // A 2-d vector.
 // Ex. Symbol_Table[0] : a vector of all identifiers in scope 0.

@@ -1,0 +1,8 @@
+[Start] : parser
+string push in iStack
+[Error] : no such rule for nonterminal : S input : $
+[terminal]
+! != $ && ( ) * + , - / ; < <= = == > >= [ ] break char else epsilon id if int num return while { || } 
+[nonterminal]
+BinOp Block DeclHead DeclTail Expr Expr' Expr'' ExprList ExprListTail ExprListTail' FunDecl FunDeclList FunDeclList' ParamDecl ParamDecl' ParamDeclList ParamDeclListTail ParamDeclListTail' Primary Primary' Primary'' Program S Stmt StmtList StmtList' Type UnaryOp VarDecl VarDecl' VarDeclList 
+[START] create Symbol_Table
