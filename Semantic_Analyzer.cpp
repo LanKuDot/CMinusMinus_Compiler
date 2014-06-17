@@ -13,17 +13,6 @@ using namespace std;
 int Scope_Range = 0;
 int R_Scope_Range = 0;
 
-// the Symbol_Detail records the detail of the symbol and will be
-// stored into Symbol_Table.
-typedef struct {
-	string symbol;
-	string token;
-	int scope;
-	string type;
-	bool initialized;
-	bool declared; 
-} Symbol_Detail;
-
 // Symbol_Table : 
 // A 2-d vector.
 // Ex. Symbol_Table[0] : a vector of all identifiers in scope 0.
@@ -32,6 +21,7 @@ vector< vector<Symbol_Detail> > TA_Symbol_Table;
 // this is a simplified symbol table...just for the
 // foolish output !!!
 stack< vector<Symbol_Detail> > Symbol_Table;
+
 
 // isDeclared(bool) : check the input symbol is declared or not.
 // parameter : 
@@ -152,6 +142,7 @@ void insert(int pos, string type, int scope, bool isDeclared, bool isInitialized
 
 		top.push_back(symDetail); 
 		Symbol_Table.push(top);	
+		Symbol_Table_Element.push_back(symDetail);
 	}
 	return;
 }
@@ -206,6 +197,7 @@ void createSymbolTable(const char * fileName) {
 					output << setw(10) << left << scope;
 					output << setw(10) << left << type;
 					output << endl;
+
 				}
 			} else {
 				cout << "error: in " << tokenList[i].token << endl;
@@ -227,4 +219,13 @@ void createSymbolTable(const char * fileName) {
 		vector<Symbol_Detail> tmp = Symbol_Table.top();
 		Symbol_Table.pop();
 	}
+
+	for (int i = 0; i != Symbol_Table_Element.size(); i++) {
+		cout << setw(10) << left << Symbol_Table_Element[i].symbol;
+		cout << setw(10) << left << Symbol_Table_Element[i].token;
+		cout << setw(10) << left << Symbol_Table_Element[i].scope;
+		cout << setw(10) << left << Symbol_Table_Element[i].type;
+		cout << endl;
+	}
 }
+
