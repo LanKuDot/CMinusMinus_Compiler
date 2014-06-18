@@ -1,54 +1,61 @@
-This is a copy of README.md from our github, recommanded you go to the website below : 
-https://github.com/LanKuDot/CMinusMinus_Compiler
+Syntax_Analzyer
+========================================================
+function 如下 : 
 
-The limited compiler for C language.
-------
-This is a litimed compiler for C language, we only consider "int"(exclude array) and some basic logical statement like if else while, this compiler cannot deal with complicated situation. 
+- 我們先來定義資料結構的部分:
+*LHS : 我把 grammar lhs 的部分直接定義成一個type。
+  typedef string LHS;
+*RHS : 這邊我用一個二維vector去儲存grammar rhs部分
+  typedef vector< vector<string> > RHS;
+*最後再用map分別去對應LHS RHS
+  typedef map<LHS, RHS> GRAMMAR;
+EX. VarDeclList
+		VarDecl VarDeclList
+		epsilon
+	會產生
+	LHS : VarDeclList
+	RHS : RHS[0][0]VarDecl [0][1]VarDeclList
+	      RHS[1][0]epsilon
 
-How to use : 
--
-1. ```make```
-2. ```./CMinusMinus```
+前置 : 任何grammar都要有一start symbol，這邊我是預先在readfile中先放進去 S -> Program $。
+		  
+- 步驟
 
-Steps of the compiler : 
--
+1. 產生 Set
+[nullable] : 先確認一個symbol是否為nonterminal，再往下查找，概念很簡單，就是去grammar查找，有epsilon則稱該symbol為nullable。
+[first] : 確認nullable之後即可開始先找它的first set，我是按照講義上的教法，當一個RHS 第一個symbol nullable=true，那麼就往下一個繼續查找，我是利用recursive
+不斷查找。為避免重複加入相同symbol，我使用了C++ STL中的 set。
+[follow] : 上述都做完之後才可做follow的部分，先看一下follow的規則，
+	// A -> BC
+	// Rules : 
+	// 1. Follow(B) contains First(C)
+	// 2. Follow(B) contains Follow(C) if nullable(C) is true
+	// 3. Follow(B) contains Follow(A) if nullable(C) is true
+	// 4. Follow(C) contains Follow(A) 
+依照上述規則，我將"基本的"follow table做好，但是裏頭有包含許多nonterminal，所以我必須再一個個將followtable中的nonterminal消除，
+具體消除的辦法，有點瑣碎，首先followset可能包含自己，那我們要先把自己給刪掉，再來將所有的follow(nonterminal)一個個查表填入follow(自己)，
+但因為我不知道哪一個nonterminal先將本身follow中的nonterminal消除，我必須用一個for loop用一個最大上限跑到他們全部做完為止。(這不是個好做法，
+但我目前也沒有打算再做更動了...)
 
-###lexer
-- parsing the input file (EX. main.c), determine the types of all symbols in it. 
+2. 產生 LLTable
+LLTable概念很簡單，吃進一symbol，first(LHS)中有symbol，就去找其對應的rule，有的話就先塞進LLTable，沒有的話就看follow(LHS)，然後塞epsilon。
 
-###Syntax_Analyzer (use LL(0) parsing)
-- check if there is any syntax error in the input file (by grammar.txt).
-- Steps of Syntax_Analyzer
-- 1. find the nullable, first, and follow sets of each symbol
-- 2. create LLTable
-- 3. create parse tree 
-- If you got an error in the console, you can go check the Set.txt, Table.txt, Parse_Tree.txt,
-- and go check anything wrong.
-
-###Semantic_Analyzer
-- We didn't create semantic rule here(Don't know how), and we check invalid variable only. (replicated declared)
-- The Semantic Analyzer only created symbol table here, the table will show scope, type, token, of each identifier.
-- If you want to check the Semantic Analyzer is right or not, you can check the Symbol_Table.txt
-
-###Quadruple
--
-
-###Tiny Machine
--
+3. 產生Parse_Tree
+基本上我就只是照著講義上提供的演算法實作出來，其他部分沒有特別要講的地方。主要就是利用stack實作
 
 
-## Vaild tokens
-- **Keywords**: int char return if else while break
-- **Operators**: = ! + - * / == != < > <= >= && ||
-- **Special Symbols**: [ ] { } ( ) ; ,
-- **Identifier**: [A-Za-z\_][A-Za-z0-9\_]\*
-- **Number**: [0-9]+
-- **Char**: '[.|\\n|\\t| ]'
-- **Comment**: //
 
-## Coding Style
-The input file(Ex. main.c) must contain at least one space between two tokens.
+Semantic_Analyzer
+===============================================
+產生 Symbol_Table.txt
 
-## Grammar
-The grammar can be switched to anything else, but note that all the indention in the grammar should be "space", do not use "tab".
+stack<vector<Symbol_Detail>> Symbol_Table
+
+每展開一個scope都會先宣告一vector，先塞到stack top並將其所有變數存儲在vector中。
+Symbol_Detail是每個symbol的詳細內容，具體來說有symbol token scope isDeclared isInitialized。
+
+這邊我們只有考慮int 和char，並沒有實際做出semantic rule，概念基本上來說也是利用stack實作，每讀進 "(" scope就加1(有例外情況喇!我是把它可能會爆掉的情況列出來，
+像是左邊有 + - * / 就代表他不是有效scope宣告)，吃到id先判斷該變數使否有宣告過，宣告過就僅在stack top中的vector中查找是否有相同名子且有宣告的變數，若有則抱錯。
+若吃進的symbol沒有宣告過，就得不斷去stack中查，如果都沒有查到有宣告過的變數，則報錯。
+目前來說就只是做到可以查看變數是否合法。
 
