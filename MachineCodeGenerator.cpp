@@ -331,11 +331,13 @@ char *getQuadrupleLastTempVar()
  * Return 1 if got an element successfully, otherwise,
  * return -1.
  */
+#define BUFFER_LEN  256
+
 int readinElement( FILE *fp, parseTree_Ele *node )
 {
-	char buffer[128], *token;
+	char buffer[BUFFER_LEN+1], *token;
 
-	if ( fgets( buffer, 128, fp ) != NULL )
+	if ( fgets( buffer, BUFFER_LEN, fp ) != NULL )
 	{
 		bytesRead += strlen( buffer );
 
