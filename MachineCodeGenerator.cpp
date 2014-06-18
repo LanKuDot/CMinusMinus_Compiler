@@ -36,6 +36,7 @@ void pushQuadrupleResult( Quadruple *target );
 char *getQuadrupleLastTempVar();
 
 vector< Quadruple > quadruples;
+long int bytesRead = 0;	// Record the bytes read from file
 
 void machineCodeGenerator()
 {
@@ -112,17 +113,16 @@ int Expr_recv( FILE *fp, int topStackLevel )
 				node.stackLevel < topStackLevel )
 			break;
 
-		/* Expr -> Primary Expr" */
+		/* Expr -> Primary ExprB */
 		if ( strcmp( node.name, "Primary" ) == 0 )
 		{
-			/* Primary -> id Primary' |
-			 *            num |
+			/* Primary -> num |
 			 *            ( Expr )
 			 */
 			readinElement( fp, &node );
 			if ( strcmp( node.name, "(" ) != 0 )
 			{
-				// Temporarily store the id or number to arg1
+				// Temporarily store number to arg1
 				strcpy( quad_ele.arg1, node.name );
 			}
 			else
@@ -130,6 +130,11 @@ int Expr_recv( FILE *fp, int topStackLevel )
 				// Expr -> Primary Expr" -> ( Expr ) Expr"
 				readinElement( fp, &node );
 			}
+		}
+		/* Expr -> id ExprC ExprB */
+		else if ( strcmp( node.name, "ExprC" ) == 0 )
+		{
+			strcpy( quad_ele.arg1, last_node.name );
 		}
 		/* Expr -> UnaryOp Expr Expr" */
 		else if ( strcmp( node.name, "UnaryOp" ) == 0 )
@@ -139,18 +144,34 @@ int Expr_recv( FILE *fp, int topStackLevel )
 			setQuadrupleUnaryOp( &quad_ele, node.name );
 		}
 		/* Array
-		 * Quadruple format:
-		 * - ARRAYAD id index result: get the address of the index of the array.
-		 * - ARRAYVA id index result: get the value of the index of the array.
+		 * Expr -*> ... ExprD ...
+		 * ExprD -> [ Expr ] ExprE | esplion
+		 * ExprE -> = Expr | esplion
+		 *
+		 * If ExprE products "= Expr", array element is lvalue.
+		 * If ExprE products "esplion", array element is rvalue.
 		 */
-		else if ( strcmp( node.name, "[" ) == 0 )
+		else if ( strcmp( node.name, "ExprE" ) == 0 )
 		{
-			// Expr' -> [ Expr ] = Expr
-			if ( strcmp( last_node.name, "Expr'" ) == 0 )
-				strcpy( quad_ele.op, "ARRAYAD" );
-			// Primary' -> [ Expr ]
+			long int lastBytesRead = bytesRead;
+			// Pop the last quadruples to assign opcode
+			Quadruple tmp = quadruples.back();
+			quadruples.pop_back();
+
+			// Read 1 parse tree element ahead
+			readinElement( fp, &node );
+
+			if ( strcmp( node.name, "=" ) == 0 )
+				strcpy( tmp.op, "ARRAYAD" );
 			else
-				strcpy( quad_ele.op, "ARRAYVA" );
+				strcpy( tmp.op, "ARRAYVA" );
+
+			// Push back to the quadruples
+			quadruples.push_back( tmp );
+ 
+			// Reset to the last node read
+			fseek( fp, lastBytesRead, SEEK_SET );
+			bytesRead = lastBytesRead;
 		}
 		/* Assign
 		 * Expr' -> = Expr |
@@ -316,6 +337,8 @@ int readinElement( FILE *fp, parseTree_Ele *node )
 
 	if ( fgets( buffer, 128, fp ) != NULL )
 	{
+		bytesRead += strlen( buffer );
+
 		// Parse space and new line character.
 		token = strtok( buffer, " \n\t" );
 		// Get stack level
@@ -337,13 +360,15 @@ int readinElement( FILE *fp, parseTree_Ele *node )
 
 /* Get the stack level of begin of scope of the function.
  * According to the modified grammar, the stack level of
- * begin of the function scope is that of funcion id plus 2.
+ * begin of the function scope is that of funcion id plus 1.
  * Here is the garmmar (the stack level):
- * DeclHead -> Type id DeclTail (x)
- * DeclTail (x) -> ( ParamDeclList ) Block DeclHead (x+1)
+ * Program -> DeclHead DecTail DeclList (x)
+ * DeclHead (x) -> Type id (x+1) - Here is function id
+ * DeclTail (x) -> ( ParamDeclList ) Block (x+1)
  * Block (x+1) -> { ... } (x+2) - The scope of func id starts at here.
  *
  * - *fp: [in] The file pointer to the parse tree file
+ * - *funcName: [in] The identifier of function
  *
  * Return the stack level of the begin of the scope of the
  * function. or return -1, if not found.
@@ -368,7 +393,7 @@ int getFuncDeclStackLevel( FILE *fp, const char *funcName )
 	{
 		if ( strcmp( node.name, "{" ) == 0 )
 		{
-			if ( node.stackLevel - declStackLevel == 2 )
+			if ( node.stackLevel - declStackLevel == 1 )
 			{
 				return node.stackLevel;
 			}
