@@ -13,17 +13,12 @@ using namespace std;
 int Scope_Range = 0;
 int R_Scope_Range = 0;
 
-//vector<Symbol_Detail> Symbol_Table_Element;
-
-// Symbol_Table : 
-// A 2-d vector.
-// Ex. Symbol_Table[0] : a vector of all identifiers in scope 0.
+// it is used to check Symbol_Table
 vector< vector<Symbol_Detail> > TA_Symbol_Table;
 
 // this is a simplified symbol table...just for the
 // foolish output !!!
 stack< vector<Symbol_Detail> > Symbol_Table;
-
 
 // isDeclared(bool) : check the input symbol is declared or not.
 // parameter : 
@@ -66,18 +61,13 @@ string lookUp (int pos, int scope, bool isDeclared, bool isInitialized) {
 	//cout << "[lookUp]" << endl;
 	string debugToken = tokenList[pos].token + " : ";
 
-	// cScope means check scope, in lookUp, we will check if all the identifier
-	// in the cScope to determine the input identifier is legal or not.
-	// If the identifier is declared , check the scope it exists, else 
-	// check its parent scope to check it have been declared in parent scope.
-
 	string type = "";
 	
 	//cout << debugToken << endl;
+	// the symbol is declared, we only need to check if it is declared
+	// before in its scope.
 	if (isDeclared) {
 		//cout << "declared" << endl;
-		// because the symbol is initialized the type of 
-		// this symbol must be the last symbol;
 		vector<Symbol_Detail> top = Symbol_Table.top();
 		type = tokenList[pos - 1].token;
 		for (int i = 0; i != top.size(); i++) {
@@ -91,6 +81,7 @@ string lookUp (int pos, int scope, bool isDeclared, bool isInitialized) {
 
 	// cout << "undeclared" << endl;
 	// not declared
+	// we have to check all the parent scope until finding the var which has been declared
 	vector< vector<Symbol_Detail> > tmp;
 	while (!Symbol_Table.empty()) {
 		vector<Symbol_Detail> top = Symbol_Table.top();
@@ -131,6 +122,7 @@ string lookUp (int pos, int scope, bool isDeclared, bool isInitialized) {
 
 void insert(int pos, string type, int scope, bool isDeclared, bool isInitialized) {
 	//cout << "[insert]" << endl;
+	// only insert those which are declared.
 	if (isDeclared) {
 		vector<Symbol_Detail> top = Symbol_Table.top();
 		Symbol_Table.pop();
@@ -149,7 +141,6 @@ void insert(int pos, string type, int scope, bool isDeclared, bool isInitialized
 	return;
 }
 
-
 void createSymbolTable(const char * fileName) {
 	ofstream outFile;	
 	outFile.open(fileName);
@@ -162,9 +153,10 @@ void createSymbolTable(const char * fileName) {
 	cout << "[START] create Symbol_Table" << endl;
 
 	// * check every symbol in main.c .
-	// 1. symbols which are "{", will let the global variable Scope_Range plus
+	// 1. symbols which are "(", will let the global variable Scope_Range plus
 	// one, since this symbol start a new scope and create a vector of Symbol_Detail
 	// then pushed it into the symbol_table.
+	// but there are some exceptions that we need to handle it. (ex. a = (3 + 4))
 	// 2. symbols which are "}", will let the global variable Scope_Range minus
 	// one, since this symbol end a scope.
 	// 3. oters : check it is identifer and then loopUp	in the Symbol_Table, if 
@@ -227,12 +219,12 @@ void createSymbolTable(const char * fileName) {
 		Symbol_Table.pop();
 	}
 
-	for (int i = 0; i != Symbol_Table_Element.size(); i++) {
-		cout << setw(10) << left << Symbol_Table_Element[i].symbol;
-		cout << setw(10) << left << Symbol_Table_Element[i].token;
-		cout << setw(10) << left << Symbol_Table_Element[i].scope;
-		cout << setw(10) << left << Symbol_Table_Element[i].type;
-		cout << endl;
-	}
+	//for (int i = 0; i != Symbol_Table_Element.size(); i++) {
+//		cout << setw(10) << left << Symbol_Table_Element[i].symbol;
+//		cout << setw(10) << left << Symbol_Table_Element[i].token;
+//		cout << setw(10) << left << Symbol_Table_Element[i].scope;
+//		cout << setw(10) << left << Symbol_Table_Element[i].type;
+//		cout << endl;
+//	}
 }
 
