@@ -201,24 +201,21 @@ enum Category character( char *input, int now )
 {
 	switch( input[now] )
 	{
-		// match characters and space
-		case 'A' ... 'Z' :
-		case 'a' ... 'z' :
-		case ' ' :
-			++now;
-			break;
-
 		// match \\n and \\t
 		case '\\' :
 			++now;
 			if ( input[now] == 'n' || input[now] == 't' )
 				++now;
-			else
-				return ERROR;
 			break;
 
-		default :
-			return ERROR;
+		// match characters
+		default:
+			// The ASCII code of the vaild characters is from
+			// 32 ( space ) to 126 ( ~ )
+			if ( input[now] < 32 && input[now] > 126 )
+				return ERROR;
+			++now;
+			break;
 	}
 
 	// match right '
