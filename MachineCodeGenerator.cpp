@@ -25,6 +25,7 @@ void outputQuadruple();
 
 /* Quadruple generating function. */
 int GlobalDecl_quadruple( FILE *fp, int topStackLevel );
+int LocalDecl_quadruple( FILE *fp, int topStackLevel );
 int Decl_quadruple( FILE *fp, int topStackLevel );
 int Expr_recv( FILE *fp, int topStackLevel );
 
@@ -76,14 +77,27 @@ void createQuadruple()
 	parseTree_Ele node;
 	Quadruple quad_ele;
 
+	// Generate quadruple global variable
+	GlobalDecl_quadruple( fp, 1 );
+
+	// Reset the file pointer
+	fseek( fp, 0, SEEK_SET );
+
 	/* Get the stack level of the scope of the main function */
 	int mainFuncScopeStackLv = getFuncDeclStackLevel( fp, "main" );
 
-	// Reset the file pointer head
-	fseek( fp, 0, SEEK_SET );
+	/* Only generate the quadruple of main function */
+	while ( readinElement( fp, &node ) != -1 )
+	{
+		if ( node.stackLevel < mainFuncScopeStackLv  )
+			break;
 
-	GlobalDecl_quadruple( fp, 1 );
-
+		/* Declaration of local variable */
+		if ( strcmp( node.name, "VarDeclList" ) == 0 )
+		{
+			LocalDecl_quadruple( fp, node.stackLevel );
+		}
+	}
 
 	fclose( fp );
 
@@ -146,7 +160,95 @@ int GlobalDecl_quadruple( FILE *fp, int topStackLevel )
 
 }	// end of GlobalDecl_quadruple()
 
-/* Generate quadruple for variable declaration
+// TODO: There is large part of code the same as GlobalDecl_quadruple()
+// Try to merge them.
+// TODO: int c = a [ 1 ] + 9 ; is incorrcet.
+// Generate -> VARDECL int        c
+//             ARRAYVA a     1    t1
+//             =       t1         c ( Lost + 9 )
+/* Generate quadruple for local variavle declaration
+ * VarDeclList -> VarDecl VarDeclList | esplion
+ */
+int LocalDecl_quadruple( FILE *fp, int topStackLevel )
+{
+	parseTree_Ele node;
+	Quadruple quad_ele;
+
+	// Initialize the quadruple
+	memset( &quad_ele, 0 , sizeof( Quadruple ) );
+
+	while ( readinElement( fp, &node ) != -1 )
+	{
+		if ( node.stackLevel == topStackLevel )
+			break;
+
+ 		/* VarDecl -> Type id VarDeclTail */
+		if ( strcmp( node.name, "VarDecl" ) == 0 )
+		{
+			Decl_quadruple( fp, node.stackLevel );
+
+			// Pop the quadruple temporarily pushed in the list
+			Quadruple tmp = quadruples.back();
+			quadruples.pop_back();
+
+			/* VarDeclTail -> ; | [ num ] ; | ExprAsgn */
+			// Get VarDeclTail and first
+			readinElement( fp, &node );
+			readinElement( fp, &node );
+
+			switch ( node.name[0] )
+			{
+				// Vairable declaration
+				case ';':
+					strcpy( tmp.op, "VARDECL" );
+					quadruples.push_back( tmp );
+					break;
+
+				// Array declaration
+				case '[':
+					strcpy( tmp.op, "ARRAYDE" );
+
+					// Get array length
+					readinElement( fp, &node );
+					strcpy( tmp.arg2,  node.name );
+
+					quadruples.push_back( tmp );
+					break;
+				
+				// Variable declaration with initialization
+ 				// ExprAsgn -> = Expr
+		// TODO: ExprAsgn -> [ Expr ] = Expr is wrong grammar.
+		// Eg. int a [ 9 ] = 9 ;
+				case 'E': // ExprAsgn
+					strcpy( tmp.op, "VARDECL" );
+					quadruples.push_back( tmp );
+
+					// Assignment
+					readinElement( fp, &node );
+					strcpy( quad_ele.op, "=" );
+					strcpy( quad_ele.result, tmp.result );
+
+					// Expr
+					readinElement( fp, &node );
+					Expr_recv( fp, node.stackLevel );
+					tmp = quadruples.back();
+					quadruples.pop_back();
+
+					strcpy( quad_ele.arg1, tmp.arg1 );
+					quadruples.push_back( quad_ele );
+
+					// Initialize the quadruple
+					memset( &quad_ele, 0, sizeof( Quadruple ) );
+
+					break;
+			}	// end of switch( node.name[0] )
+		}
+	}	// end of while( readinElement )
+
+	return VAR_DECL;
+}	// end of LocalDecl_quadruple()
+
+/* Generate quadruple for global variable declaration
  * DeclHead -> Type id */
 int Decl_quadruple( FILE *fp, int topStackLevel )
 {
