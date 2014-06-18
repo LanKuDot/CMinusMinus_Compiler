@@ -24,6 +24,8 @@ void createQuadruple();
 void outputQuadruple();
 
 /* Quadruple generating function. */
+int GlobalDecl_quadruple( FILE *fp, int topStackLevel );
+int Decl_quadruple( FILE *fp, int topStackLevel );
 int Expr_recv( FILE *fp, int topStackLevel );
 
 int readinElement( FILE *fp, parseTree_Ele *node );
@@ -35,6 +37,11 @@ void setQuadrupleArg2( Quadruple *target, int tmpVar_action );
 void pushQuadrupleResult( Quadruple *target );
 char *getQuadrupleLastTempVar();
 
+#define VAR_AND_NUM   1
+#define ASSIGN        2
+#define VAR_DECL      3
+
+int tmpVar_used = 0;
 vector< Quadruple > quadruples;
 long int bytesRead = 0;	// Record the bytes read from file
 
@@ -67,31 +74,104 @@ void createQuadruple()
 {
 	FILE *fp = fopen( PARSE_TREE_FILE, "r" );
 	parseTree_Ele node;
+	Quadruple quad_ele;
 
 	/* Get the stack level of the scope of the main function */
 	int mainFuncScopeStackLv = getFuncDeclStackLevel( fp, "main" );
 
-	/* Only expression( Expr ) needs to generate quadruple. */
-	while ( readinElement( fp, &node ) != -1 )
-	{
-		if ( strcmp( node.name, "Expr" ) == 0 )
-		{
-			Expr_recv( fp, mainFuncScopeStackLv );
-			/* Only main scope needs to generate TAC */
-			break;
-		}
-	}
+	// Reset the file pointer head
+	fseek( fp, 0, SEEK_SET );
+
+	GlobalDecl_quadruple( fp, 1 );
+
 
 	fclose( fp );
 
 }	// end of createQuadruple()
 
-#define VAR_AND_NUM   1
-#define ASSIGN        2
+/* Generate quadruple of global variable
+ */
+int GlobalDecl_quadruple( FILE *fp, int topStackLevel )
+{
+	parseTree_Ele node;
+	Quadruple quad_ele;
 
-int tmpVar_used = 0;
+	while ( readinElement( fp, &node ) != -1 )
+	{
+		/* Global Variable Declaration
+		 * Program -> DeclHead DeclTail DeclList
+		 * DeclTail -> ; | [ num ] ; | ( ParamDecList ) Block */
+		if ( strcmp( node.name, "DeclHead" ) == 0 )
+		{
+			Decl_quadruple( fp, node.stackLevel );
 
-/* Genetare quadruple recursively for expression.
+			// Pop the quadruple temporarily stored into list
+			Quadruple tmp;
+			tmp = quadruples.back();
+			quadruples.pop_back();
+
+			// Get DeclTail and first
+			readinElement( fp, &node );
+			readinElement( fp, &node );
+
+			// DeclTail -> ; | [ num ] ; |
+			//             ( ParamDecList ) Block
+			switch ( node.name[0] )
+			{
+				// Variable declaration
+				case ';':
+					strcpy( tmp.op, "VARDECL" );
+					quadruples.push_back( tmp );
+					break;
+
+				// Array declaration
+				case '[':
+					strcpy( tmp.op, "ARRAYDE" );
+
+					// Get array length
+					readinElement( fp, &node );
+					strcpy( tmp.arg2,  node.name );
+
+					quadruples.push_back( tmp );
+					break;
+
+				// Function declaration
+				default:
+					break;
+			}	// end of switch( node.name[0] )
+		}
+	}	// end of while( readinElement )
+
+	return VAR_DECL;
+
+}	// end of GlobalDecl_quadruple()
+
+/* Generate quadruple for variable declaration
+ * DeclHead -> Type id */
+int Decl_quadruple( FILE *fp, int topStackLevel )
+{
+	parseTree_Ele node;
+	Quadruple quad_ele;
+
+	// Initialize the quadruple
+	memset( &quad_ele, 0, sizeof( Quadruple ) );
+
+	// Get Type and type name
+	readinElement( fp, &node );
+	readinElement( fp, &node );
+	strcpy( quad_ele.arg1, node.name );
+
+	// Get the name of variable
+	readinElement( fp, &node );
+	strcpy( quad_ele.result, node.name );
+
+	// Push the quadruple temporarily
+	quadruples.push_back( quad_ele );
+
+	return VAR_DECL;
+}	// end of Decl_quadruple()
+
+/* Generate quadruple recursively for expression.
  * - *fp: [in] The file pointer of parse tree
  * - topStackLevel: [in] The stack level of the nonterminal
  *   Expr in the parse tree.
