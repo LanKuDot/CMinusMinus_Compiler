@@ -210,7 +210,8 @@ void createSymbolTable(const char * fileName) {
 			&& tokenList[i - 1].token != "+"
 			&& tokenList[i - 1].token != "-"
 			&& tokenList[i - 1].token != "*"
-			&& tokenList[i - 1].token != "/") {
+			&& tokenList[i - 1].token != "/"
+			&& tokenList[i - 1].token != "="){
 			vector<Symbol_Detail> tmp;
 			Symbol_Table.push(tmp);
 			Scope_Range++;
