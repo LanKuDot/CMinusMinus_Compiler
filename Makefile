@@ -15,6 +15,7 @@ SRCS = CMinusMinus.cpp \
 	   Syntax_Analyzer.cpp \
 	   Semantic_Analyzer.cpp \
 	   QuadrupleGenerator.cpp \
+	   MachineCodeGTR.cpp \
 	   simple_itoa.cpp
 
 All: $(SRCS)

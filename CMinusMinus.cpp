@@ -1,10 +1,13 @@
 #include <iostream>
 #include <vector>
 #include <cstring>
+
 #include "lexer.h"
 #include "Syntax_Analyzer.h"
 #include "Semantic_Analyzer.h"
 #include "QuadrupleGenerator.h"
+#include "MachineCodeGTR.h"
+
 #include "config.h"
 
 using namespace std;
@@ -55,6 +58,7 @@ int main( int argc, char *argv[] )
 	createSymbolTable(SYMBOL_TABLE_FILE);
 
 	QuadrupleGenerator();
+	machineCodeGenerator();
 
 	return 0;	
 }

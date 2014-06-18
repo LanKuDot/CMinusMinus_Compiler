@@ -8,5 +8,6 @@
 #define LLTABLE_FILE		"Table.txt"
 #define SYMBOL_TABLE_FILE   "Symbol_Table.txt"
 #define QUADRUPLE_OUT_FILE  "quadruples.txt"
+#define TM_CODE_FILE        "code.tm"
 
 #endif /* CONFIG_H */

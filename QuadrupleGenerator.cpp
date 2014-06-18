@@ -15,10 +15,6 @@ typedef struct parseTree_element {
 	char name[64];
 } parseTree_Ele;
 
-typedef struct Quadruple_element {
-	char op[8], arg1[8], arg2[8], result[8];
-} Quadruple;
-
 /* Basic Function */
 void createQuadruple();
 void outputQuadruple();
@@ -43,7 +39,6 @@ char *getQuadrupleLastTempVar();
 #define VAR_DECL      3
 
 int tmpVar_used = 0;
-vector< Quadruple > quadruples;
 long int bytesRead = 0;	// Record the bytes read from file
 
 void QuadrupleGenerator()
