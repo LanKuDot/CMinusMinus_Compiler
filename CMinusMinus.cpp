@@ -4,7 +4,7 @@
 #include "lexer.h"
 #include "Syntax_Analyzer.h"
 #include "Semantic_Analyzer.h"
-#include "MachineCodeGenerator.h"
+#include "QuadrupleGenerator.h"
 #include "config.h"
 
 using namespace std;
@@ -54,7 +54,7 @@ int main( int argc, char *argv[] )
 
 	createSymbolTable(SYMBOL_TABLE_FILE);
 
-	machineCodeGenerator();
+	QuadrupleGenerator();
 
 	return 0;	
 }

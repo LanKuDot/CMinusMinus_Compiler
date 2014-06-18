@@ -4,7 +4,7 @@
 #include <cstdlib>
 #include <vector>
 
-#include "MachineCodeGenerator.h"
+#include "QuadrupleGenerator.h"
 #include "simple_itoa.h"
 #include "config.h"
 
@@ -46,7 +46,7 @@ int tmpVar_used = 0;
 vector< Quadruple > quadruples;
 long int bytesRead = 0;	// Record the bytes read from file
 
-void machineCodeGenerator()
+void QuadrupleGenerator()
 {
 	/* Generate quadruples */
 	createQuadruple();
