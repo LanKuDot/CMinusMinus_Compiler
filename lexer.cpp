@@ -62,6 +62,27 @@ int lexial_analyzer( const char *source_file, vector<Token_info> *token_list )
 		// Analyze the category of the input token
 		while ( token != NULL )
 		{
+			// Get only one ' -> Handle the ' ' whitespace
+			if ( strcmp( token, "'" ) == 0 )
+			{
+				char *tmp;
+				int space_num, index = 0;
+				// Attemp to get next '
+				tmp = strtok( NULL, " \n\t\r" );
+
+				// Generate the token
+				output_buf[index++] = '\'';
+				for ( space_num = 0; space_num < (size_t)(tmp-token) - 1; ++space_num )
+				{
+					output_buf[index++] = ' ';
+				}
+				output_buf[index] = '\0';
+				strcat( output_buf, token );
+
+				// Assign
+				token = output_buf;
+			}
+
 			token_info.category = start( token, 0 );
 
 			// Get a comment token then ignore the remain
