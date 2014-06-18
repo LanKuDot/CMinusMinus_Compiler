@@ -82,6 +82,7 @@ void createQuadruple()
 
 	// Reset the file pointer
 	fseek( fp, 0, SEEK_SET );
+	bytesRead = 0;
 
 	/* Get the stack level of the scope of the main function */
 	int mainFuncScopeStackLv = getFuncDeclStackLevel( fp, "main" );
@@ -96,6 +97,11 @@ void createQuadruple()
 		if ( strcmp( node.name, "VarDeclList" ) == 0 )
 		{
 			LocalDecl_quadruple( fp, node.stackLevel );
+		}
+		/* Handle expression */
+		else if ( strcmp( node.name, "Expr" ) == 0 )
+		{
+			Expr_recv( fp, node.stackLevel );
 		}
 	}
 
