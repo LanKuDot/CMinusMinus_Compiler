@@ -21,7 +21,7 @@ All: $(SRCS)
 	$(COMPILER) $(CFLAG) -o $(OUTPUT_EXE) $(SRCS)
 
 run:
-	./$(OUTPUT_EXE)
+	./$(OUTPUT_EXE) main.c
 
 dbg:
 	gdb $(OUTPUT_EXE)
