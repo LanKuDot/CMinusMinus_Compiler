@@ -150,7 +150,7 @@ void createSymbolTable(const char * fileName) {
 	} 
 
 	ostream & output(outFile.is_open() ? outFile : cout);
-	cout << "[START] create Symbol_Table" << endl;
+	cout << "[START] : Create Symbol_Table" << endl;
 
 	// * check every symbol in main.c .
 	// 1. symbols which are "(", will let the global variable Scope_Range plus
@@ -226,5 +226,6 @@ void createSymbolTable(const char * fileName) {
 //		cout << setw(10) << left << Symbol_Table_Element[i].type;
 //		cout << endl;
 //	}
+    cout << "Done" << endl;
 }
 

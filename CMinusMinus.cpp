@@ -48,7 +48,7 @@ int main( int argc, char *argv[] )
 	// create parse tree
 	parser(tokenList, PARSE_TREE_FILE );
 
-	printTermNonterminal();
+	// printTermNonterminal();
 	printSet(SET_FILE);
 	printLLTable(LLTABLE_FILE);
 

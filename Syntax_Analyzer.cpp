@@ -428,7 +428,7 @@ void parser(vector<Token_info> & tokenList, const char * fileName) {
 	outFile.open(fileName);
 	ostream & output(outFile.is_open() ? outFile : cout);
 
-	cout << "[Start] : parser" << endl;
+	cout << "[START] : Create Parser Tree" << endl;
 
 	stack<string> pStack;  // production stack
 	stack<Token_info> iStack;  // input stack
@@ -456,7 +456,7 @@ void parser(vector<Token_info> & tokenList, const char * fileName) {
 	while ((--i) != -1) {
 		iStack.push(tokenList[i]);
 	}
-	cout << "string push in iStack" << endl;
+	//cout << "string push in iStack" << endl;
 
 	if (oStack.empty()) { oStack.push(order); }
 	while (!pStack.empty()) {
@@ -555,7 +555,7 @@ void parser(vector<Token_info> & tokenList, const char * fileName) {
 			}
 		}
 	}
-
+	cout << "Done" << endl;
 	return;	
 } 
 
@@ -716,6 +716,7 @@ void printLLTable (const char * fileName) {
 }
 
 void createNullTable() {
+	cout << "[START] : Create nullable table" << endl;
 	GRAMMAR::iterator it;
 	// create nullTable
 	for (it = grammar.begin(); it != grammar.end(); it++) {
@@ -727,10 +728,12 @@ void createNullTable() {
 			nullTable[lhs] = false;
 		}
 	} 
+	cout << "Done" << endl;
 	return;
 }
 
 void createFirstTable() {
+	cout << "[START] : Create FirstTable" << endl;
 	GRAMMAR::iterator it;
 	// create first table
 	for (map<LHS, RHS>::iterator it = grammar.begin(); it != grammar.end(); it++) {
@@ -744,10 +747,12 @@ void createFirstTable() {
 			}
 		}
 	}
+	cout << "Done" << endl;
 	return;
 }
 
 void createFollowTable() {
+	cout << "[START] : Create FollowTable" << endl;
 	GRAMMAR::iterator it;
 	// create follow table
 	for (it = grammar.begin(); it != grammar.end(); it++) {
@@ -755,6 +760,7 @@ void createFollowTable() {
 		getFollow(lhs);
 	}
 	eliminateNonterminal();
+	cout << "Done" << endl;
 	return;
 }
 
