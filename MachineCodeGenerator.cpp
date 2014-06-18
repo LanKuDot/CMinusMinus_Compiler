@@ -103,6 +103,24 @@ void createQuadruple()
 		{
 			Expr_recv( fp, node.stackLevel );
 		}
+		/* Handle return
+		 * Stmt -> return Expr ; */
+		else if ( strcmp( node.name, "return" ) == 0 )
+		{
+			// Get Expr
+			readinElement( fp, &node );
+			Expr_recv( fp, node.stackLevel );
+
+			// Pop the quadruple temporarily pushed into the list
+			Quadruple tmp = quadruples.back();
+			quadruples.pop_back();
+
+			// Just to add the opcode
+			strcpy( tmp.op, "RETURN" );
+
+			// Push back
+			quadruples.push_back( tmp );
+		}
 	}
 
 	fclose( fp );
