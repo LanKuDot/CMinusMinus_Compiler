@@ -1,3 +1,55 @@
+組員：F74002183 李昆憶 ( LanKuDot )
+      F74002141 曾冠博 ( brandboat )
+
+Project on Github：https://github.com/LanKuDot/CMinusMinus_Compiler
+
+Lexer
+========================================================
++ 實作函式：lexial_analyzer( const char *source_file,
+                             vector< Token_info > *token_list );
++ 資料結構：
+typedef struct {
+    string token;        // 該 token 的內容
+    string tranToken;    // ???
+    int lineNumber;      // 該 token 在原始碼中的行號
+    enum Category category;  // 該 token 的種類
+} Token_info;
+
++ 實作：
+1. 從 source code 中一次讀取一行 code
+2. 透過 strtok 函式將 token 從 buffer 中分離出來
+3. 將所得到的 token 傳送到 start 進行 lexial analysis
+
+   lexial analysis 是由 DFA 組成，有四個主要的處理函式：
+   - start, number, character, identifier
+   每轉換一個 function 都會繼續判斷下一個 character
+
+   先判斷 token 的第一個 character
+   3.1 如果是字母或 _ ：到 identifier state
+     3.1.1 先 match 是不是 keyword，如果是，判定此 token 為 KEYWORD
+     3.1.2 判斷接下來的字元是皆為字元和數字或_，如果都是，判定此 token 為 IDENTIFIER
+	       如果不是，就判定為 ERROR
+
+   3.2 如果是數字：到 number state
+     3.2.1 如果後面所帶的字元皆為數字，則判定為 NUMBER，否則為 ERROR
+
+   3.3 如果是單引號：到 character state
+     3.3.1 先 match escape character \t 及 \n，如果 \ 後面不是 n 或 t，則為 ERROR
+     3.3.2 如果單引號後面的第一個字元不是 \，則直接讀取該字元
+     3.3.3 再來判斷下一個字元是否為單引號，（除非是 escape character，不然兩個單引號中間
+           只能有一個字元 ），如果不是則為 ERROR
+     3.3.4 判斷單引號後面是否還有字元，如果有則為 ERROR，否則為 CHAR
+
+   3.4 [ ] { } ( ) ; , ：如果後面沒有接任何字元，則為 SPECIAL_SYMBOL
+   3.5 + - * ：如果後面沒有接任何字元，則為 OPERATOR
+   3.6 /：如果下一個字元是 /，則為 COMMENT，並結束該行的 lexial analysis
+       否則沒有接其他字元，則為 OPERATOR
+   3.7 其他的 operators，也一樣，如果後面沒有接任何字元，則為 OPERATOR，否則是 ERROR
+
+4. 從 DFA 出來後，會回傳此 token 的種類，如果收到 COMMENT，則直接讀取下一行的 code
+5. 將這些資訊儲存到 Token_info 並 push 到 token_list 中，以及輸出 token list file
+
+
 Syntax_Analzyer
 ========================================================
 function 如下 : 
@@ -59,3 +111,19 @@ Symbol_Detail是每個symbol的詳細內容，具體來說有symbol token scope 
 若吃進的symbol沒有宣告過，就得不斷去stack中查，如果都沒有查到有宣告過的變數，則報錯。
 目前來說就只是做到可以查看變數是否合法。
 
+
+Quadruple generator
+==============================================
+已經定義的 quadruple：
+
+Op      Arg1    Arg2    Result
+-------------------------------
+BinOp   Arg1    Arg2    Result   將 Arg1 BinOp Arg2 的結果存到 Result
+=       Arg1            Result   將 Arg1 的值 assign 給 Result
+VARDECL type            id       產生 type 的 id 變數
+ARRAYDE type    num     id       產生擁有 num 個元素的 type 陣列 id
+ARRAYAD id      index   Result   將名為 id 的 array 的指定元素的位址存到 Result
+ARRAYVA id      index   Result   將名為 id 的 array 的指定元素的值存到 Result
+RETURN  Arg1                     將 Arg1 輸出到螢幕上
+
+實作：以 Parse tree 為資料來源，用 grammar 來產生 quadruple
