@@ -5,7 +5,7 @@ This is a litimed compiler for C language, we only consider "int"(exclude array)
 How to use : 
 -
 1. ```make```
-2. ```./CMinusMinus```
+2. ```./CMinusMinus <Filename>```
 
 Steps of the compiler : 
 -
