@@ -1,3 +1,6 @@
+This is a copy of README.md from our github, recommanded you go to the website below : 
+https://github.com/LanKuDot/CMinusMinus_Compiler
+
 The limited compiler for C language.
 ------
 This is a litimed compiler for C language, we only consider "int"(exclude array) and some basic logical statement like if else while, this compiler cannot deal with complicated situation. 
