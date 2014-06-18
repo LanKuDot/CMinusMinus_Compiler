@@ -1,48 +1,47 @@
 Program
-    DeclHead
+    DeclHead DeclTail DeclList
 DeclHead
-    Type id DeclTail
-    epsilon
+    Type id
 DeclTail
-    ; DeclHead
-    [ num ] ; DeclHead
-    ( ParamDeclList ) Block DeclHead
+    ;
+    [ num ] ;
+    ( ParamDeclList ) Block
+DeclList
+    DeclHead DeclTail DeclList
+    epsilon
 VarDeclList
     VarDecl VarDeclList
     epsilon
 VarDecl
-    Type id VarDecl'
-VarDecl'
+    Type id VarDeclTail
+VarDeclTail
     ;
     [ num ] ;
-FunDeclList
-    FunDecl FunDeclList'
-FunDeclList'
-    FunDeclList
-    epsilon
-FunDecl
-    Type id ( ParamDeclList ) Block 
+    ExprAsgn
 ParamDeclList
     ParamDeclListTail
     epsilon
 ParamDeclListTail
-    ParamDecl ParamDeclListTail'
-ParamDeclListTail'
+    ParamDecl ParamDeclListTailA
+ParamDeclListTailA
     , ParamDeclListTail
-    epsilon	
+    epsilon
 ParamDecl
-    Type id ParamDecl'
-ParamDecl'
+    Type id ParamDeclA
+ParamDeclA
     [ ]
     epsilon
 Block
-    { VarDeclList StmtList }
+    { VarDeclList StmtList BlockContentList }
+BlockContentList
+    VarDeclList StmtList BlockContentList
+    epsilon
 Type
     int
     char
 StmtList
-    Stmt StmtList'
-StmtList'
+    Stmt StmtListA
+StmtListA
     StmtList
     epsilon
 Stmt
@@ -54,22 +53,29 @@ Stmt
     while ( Expr ) Stmt
     Block
 Expr
-    Primary Expr''
-    UnaryOp Expr Expr''
-Expr'
+    id ExprC ExprB
+    Primary ExprB
+    UnaryOp Expr ExprB
+ExprC
+    ExprD
+    = Expr
+ExprD
+    ( ExprList )
+    [ Expr ] ExprE
+    epsilon
+ExprE
+    = Expr
+    epsilon
+ExprAsgn
     = Expr
     [ Expr ] = Expr
-Expr''
-    BinOp Expr Expr''
+ExprB
+    BinOp Expr ExprB
     epsilon
 Primary
-    id Primary'
     num
     ( Expr )
-Primary'
-    Primary''
-    Expr' Expr''
-Primary''
+PrimaryA
     ( ExprList )
     [ Expr ]
     epsilon
@@ -77,8 +83,8 @@ ExprList
     ExprListTail
     epsilon
 ExprListTail
-    Expr ExprListTail'
-ExprListTail'
+    Expr ExprListTailA
+ExprListTailC
     , ExprListTail
     epsilon
 UnaryOp
