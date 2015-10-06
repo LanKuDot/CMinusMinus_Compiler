@@ -18,6 +18,8 @@ SRCS = CMinusMinus.cpp \
 	   MachineCodeGTR.cpp \
 	   simple_itoa.cpp
 
+.PHONY: All run dbg default clean
+
 All: $(SRCS)
 	$(COMPILER) $(CFLAG) -o $(OUTPUT_EXE) $(SRCS)
 
